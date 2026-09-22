@@ -1,0 +1,2659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moflin Play</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&display=swap">
+<style>
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+
+:root{
+  --bg:#C9D4F6;
+  --ink:#33285A;
+  --btn:#FFFFFF;
+  --btn-ink:#33285A;
+  --focus:#33285A;
+  --shadow:rgba(51,40,90,.26);
+  --floor:#EEF7E8;
+  --wall:#2E9C8C;
+  --wall-dark:#1D6B62;
+  --wall-light:#63C7B5;
+  --stitch:#EEF7E8;
+  --heart:#F0625A;
+  --heart-light:#FF9C8F;
+  --glow:#FFC83D;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#24244A;--ink:#F2EEFF;--btn:#3B3C72;--btn-ink:#F2EEFF;--focus:#FFC83D;--shadow:rgba(0,0,0,.45);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#24244A;--ink:#F2EEFF;--btn:#3B3C72;--btn-ink:#F2EEFF;--focus:#FFC83D;--shadow:rgba(0,0,0,.45);
+}
+
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  margin:0;height:100%;
+  background:var(--bg);color:var(--ink);
+  font-family:"Fredoka","Trebuchet MS",system-ui,-apple-system,"Segoe UI",sans-serif;
+  overflow:hidden;overscroll-behavior:none;touch-action:manipulation;
+  -webkit-user-select:none;user-select:none;-webkit-touch-callout:none;
+  -webkit-tap-highlight-color:transparent;
+}
+button{font:inherit;color:inherit}
+button:focus-visible,#moflin:focus-visible .tilt{outline:4px solid var(--focus);outline-offset:3px}
+#moflin:focus-visible{outline:none}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+#app{height:100%;position:relative}
+.screen{height:100%;display:flex;flex-direction:column}
+
+/* ---------- pick screen ---------- */
+#home h1,#pick h1,#vehicle h1{
+  margin:0;padding:20px 16px 0;text-align:center;
+  font-size:clamp(34px,7vw,56px);font-weight:600;line-height:1.1;letter-spacing:.01em;
+}
+.choices{
+  flex:1;min-height:0;display:flex;flex-wrap:wrap;gap:8px;
+  align-content:space-evenly;justify-content:space-evenly;padding:8px 16px 20px;
+}
+@media (min-aspect-ratio:5/4){.choices{flex-wrap:nowrap;align-items:center}}
+.pick{
+  position:relative;width:var(--pick,120px);height:var(--pick,120px);
+  padding:0;border:0;background:none;cursor:pointer;border-radius:50%;
+  display:block;
+}
+.pick .ground{
+  position:absolute;left:20%;right:20%;bottom:4%;height:8%;
+  border-radius:50%;background:var(--shadow);filter:blur(3px);
+}
+.pick .bob{display:block;position:absolute;inset:0;animation:bob 3.4s ease-in-out infinite}
+.pick:nth-child(2) .bob{animation-delay:-1.1s}
+.pick:nth-child(3) .bob{animation-delay:-2.2s}
+.pick:nth-child(4) .bob{animation-delay:-.6s}
+.pick svg{display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 85%;transition:scale .12s}
+.pick:active svg{scale:.94}
+#pick h1,#vehicle h1{padding-top:0}
+
+/* ---------- home screen ---------- */
+.tiles{
+  flex:1;min-height:0;display:grid;grid-template-columns:repeat(2,var(--tile,150px));gap:14px;
+  justify-content:center;align-content:center;padding:16px;
+}
+@media (min-aspect-ratio:5/4){.tiles{grid-template-columns:repeat(4,var(--tile,150px))}}
+.tile{
+  position:relative;width:var(--tile,150px);height:var(--tile,150px);padding:0;border:0;cursor:pointer;
+  overflow:hidden;background:var(--tile-bg);border-radius:calc(var(--tile,150px)*.17);
+  box-shadow:0 6px 0 var(--shadow);transition:transform .12s,box-shadow .12s;
+}
+.tile:active{transform:translateY(3px);box-shadow:0 3px 0 var(--shadow)}
+.tile .art{position:absolute;inset:0;display:block;animation:tilePulse 3.8s ease-in-out infinite}
+.tile:nth-child(2) .art{animation-delay:-.9s}
+.tile:nth-child(3) .art{animation-delay:-1.8s}
+.tile:nth-child(4) .art{animation-delay:-2.7s}
+.tile .art svg{display:block;width:100%;height:100%}
+.tile.soon .art svg{filter:saturate(.55)}
+.tile .tag{
+  position:absolute;left:50%;bottom:calc(var(--tile,150px)*.05);transform:translateX(-50%);
+  background:rgba(255,255,255,.92);color:#33285A;border-radius:999px;padding:.05em .75em;
+  font-weight:600;font-size:clamp(13px,calc(var(--tile,150px)*.1),24px);line-height:1.5;white-space:nowrap;
+}
+.tile .zzz{position:absolute;top:calc(var(--tile,150px)*.05);right:calc(var(--tile,150px)*.05);width:calc(var(--tile,150px)*.22);height:calc(var(--tile,150px)*.22)}
+.tile .zzz svg{display:block;width:100%;height:100%}
+.zz{position:absolute;font-weight:600;color:#33285A;pointer-events:none;font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif}
+
+/* ---------- play screen ---------- */
+#play{display:flex}
+.bar{display:flex;align-items:center;gap:12px;padding:8px 14px;min-height:72px}
+.bar .grow{flex:1}
+.icon-btn{
+  width:56px;height:56px;border-radius:50%;border:0;background:var(--btn);color:var(--btn-ink);
+  display:grid;place-items:center;cursor:pointer;
+  box-shadow:0 3px 0 var(--shadow);
+}
+.icon-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--shadow)}
+.icon-btn:not(.moflin-btn) svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.moflin-btn svg{display:block;width:46px;height:46px;overflow:visible}
+
+#stage{flex:1;min-height:0;display:grid;place-items:center;padding:6px 12px}
+#board{position:relative;--S:40px}
+#floor{
+  position:absolute;inset:0;border-radius:calc(var(--S)*.55);background:var(--floor);
+  box-shadow:0 calc(var(--S)*.14) 0 var(--shadow);
+}
+#maze{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;overflow:visible}
+.w-shadow{stroke:var(--wall-dark)}
+.w-main{stroke:var(--wall)}
+.w-light{stroke:var(--wall-light);opacity:.55}
+.w-stitch{stroke:var(--stitch);opacity:.9}
+.goal-glow{fill:var(--glow);opacity:.45;transform-box:fill-box;transform-origin:center;animation:glow 2.2s ease-in-out infinite}
+.tube-flow{animation:flow 1.1s linear infinite}
+.swirl{transform-box:fill-box;transform-origin:center;animation:swirl 2.8s linear infinite}
+
+#nestFront{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none;overflow:visible}
+#moflin{
+  position:absolute;left:0;top:0;
+  width:calc(var(--S)*2.4);height:calc(var(--S)*2.4);
+  touch-action:none;cursor:grab;will-change:transform;
+}
+#moflin.held{cursor:grabbing}
+#moflin .mshadow{
+  position:absolute;left:50%;top:50%;
+  width:calc(var(--S)*.86);height:calc(var(--S)*.22);
+  margin:calc(var(--S)*.3) 0 0 calc(var(--S)*-.43);
+  border-radius:50%;background:var(--shadow);filter:blur(2px);pointer-events:none;
+}
+#moflin .ring{
+  position:absolute;left:50%;top:50%;
+  width:calc(var(--S)*1.15);height:calc(var(--S)*1.15);
+  margin:calc(var(--S)*-.575) 0 0 calc(var(--S)*-.575);
+  border-radius:50%;border:calc(var(--S)*.08) solid var(--heart);
+  opacity:0;pointer-events:none;
+}
+#moflin.invite .ring{animation:ring 1.5s ease-out infinite}
+#moflin .tilt{
+  position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;
+  transition:scale .12s;
+}
+#moflin.held .tilt{scale:1.07}
+.jumper{width:calc(var(--S)*1.25);height:calc(var(--S)*1.25);transform-origin:50% 85%}
+.jumper.sliding{transform-origin:50% 50%}
+.jumper svg{display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 88%;animation:breathe 3.6s ease-in-out infinite}
+
+.eyes-happy{display:none}
+.happy .eyes-open{display:none}
+.happy .eyes-happy{display:inline}
+.eyes-open{transform-box:fill-box;transform-origin:center;animation:blink 5s infinite}
+
+#hand{
+  position:absolute;left:0;top:0;width:calc(var(--S)*1.6);
+  opacity:0;pointer-events:none;z-index:6;will-change:transform;
+}
+#hand svg{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 0 rgba(51,40,90,.25))}
+
+.footer{min-height:88px;display:grid;place-items:center}
+.again{
+  width:72px;height:72px;border-radius:50%;border:0;cursor:pointer;
+  background:var(--heart);color:#fff;display:grid;place-items:center;
+  box-shadow:0 4px 0 rgba(0,0,0,.2);
+  visibility:hidden;opacity:0;transform:scale(.6);
+}
+.again svg{width:38px;height:38px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.again.show{visibility:visible;animation:pop .5s cubic-bezier(.2,1.6,.4,1) forwards}
+.again:active{filter:brightness(.95)}
+
+/* ---------- particles ---------- */
+#fx{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:50}
+.conf{position:absolute;will-change:transform}
+.fh{position:absolute;will-change:transform}
+.fh svg{display:block;width:100%;height:100%}
+
+
+/* ---------- dress up ---------- */
+#dress .bar{gap:8px;padding:8px 10px}
+#dress .icon-btn{width:52px;height:52px}
+#dress .icon-btn.camera{width:62px;height:62px;background:var(--heart);color:#fff;box-shadow:0 3px 0 rgba(0,0,0,.22)}
+#dress .icon-btn.camera svg{width:34px;height:34px}
+#dress .moflin-btn svg{width:42px;height:42px}
+#dstage{flex:1;min-height:0;position:relative;display:grid;place-items:center;overflow:hidden;padding:4px 10px}
+#dstage::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 62% 56% at 50% 46%,rgba(255,255,255,.6),rgba(255,255,255,0) 72%);
+}
+#dwrap{position:relative;width:var(--dm,260px);height:var(--dm,260px);touch-action:none}
+#dwrap .rug{
+  position:absolute;left:6%;right:6%;top:67%;height:22%;border-radius:50%;background:#FFF1D9;
+  box-shadow:0 5px 0 var(--shadow),inset 0 0 0 4px rgba(255,255,255,.7);pointer-events:none;
+}
+#dwrap .rug::after{content:"";position:absolute;inset:9%;border-radius:50%;border:3px dashed rgba(51,40,90,.18)}
+#dwrap .dshadow{position:absolute;left:29%;right:29%;top:74%;height:8%;border-radius:50%;background:var(--shadow);filter:blur(3px);pointer-events:none}
+#dm{position:absolute;inset:0;transform-origin:50% 80%}
+#dm svg{display:block;width:100%;height:100%;overflow:visible;transform-origin:50% 84%;animation:breathe 3.6s ease-in-out infinite}
+#dwrap.over #dm{filter:drop-shadow(0 0 12px #FFC83D)}
+.worn{cursor:grab}
+.pop{transform-box:fill-box;transform-origin:50% 80%}
+
+.tray{padding:6px 12px 14px;display:flex;flex-direction:column;gap:10px;align-items:center}
+.tabs{display:flex;gap:12px}
+.tab{
+  width:60px;height:60px;border-radius:50%;border:0;background:var(--btn);padding:9px;cursor:pointer;
+  box-shadow:0 3px 0 var(--shadow);display:grid;place-items:center;
+}
+.tab svg{width:100%;height:100%;display:block;pointer-events:none}
+.tab[aria-selected="true"]{background:#FFC83D;box-shadow:0 3px 0 rgba(0,0,0,.22),0 0 0 4px var(--btn)}
+.items{display:grid;grid-template-columns:repeat(3,minmax(0,86px));gap:10px;justify-content:center;width:100%}
+.item{
+  aspect-ratio:1;border:0;border-radius:20px;background:var(--ib,var(--btn));padding:9px;cursor:grab;
+  box-shadow:0 4px 0 var(--shadow);display:grid;place-items:center;touch-action:none;
+}
+.item svg{width:100%;height:100%;display:block;pointer-events:none}
+.item:active{transform:translateY(2px)}
+.dragitem{position:fixed;left:0;top:0;width:104px;height:104px;pointer-events:none;z-index:60;filter:drop-shadow(0 8px 6px rgba(0,0,0,.28))}
+.dragitem svg{width:100%;height:100%;display:block;overflow:visible}
+#dhand{position:fixed;left:0;top:0;width:64px;opacity:0;pointer-events:none;z-index:55}
+#dhand svg{display:block;width:100%;height:auto;filter:drop-shadow(0 3px 0 rgba(51,40,90,.25))}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:70}
+.sp{position:absolute;pointer-events:none}
+.sp svg{display:block;width:100%;height:100%}
+.polaroid{
+  position:absolute;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));width:min(56vw,240px);
+  background:#fff;padding:10px 10px 38px;border-radius:6px;box-shadow:0 12px 28px rgba(0,0,0,.3);
+  pointer-events:auto;transform:translate(-50%,120%) rotate(-12deg);
+}
+.polaroid .pic{aspect-ratio:1;border-radius:3px;overflow:hidden;background:linear-gradient(160deg,#FFE3F0,#DCE6FF)}
+.polaroid .pic svg{display:block;width:100%;height:100%}
+@media (min-aspect-ratio:5/4){
+  #dress{display:grid;grid-template-columns:1fr minmax(300px,36%);grid-template-rows:auto 1fr}
+  #dress .bar{grid-column:1/-1}
+  #dstage{grid-row:2;grid-column:1}
+  .tray{grid-row:2;grid-column:2;justify-content:center}
+}
+
+/* ---------- races ---------- */
+#vehicle .bar,#race .bar{gap:8px;padding:8px 10px}
+#race .icon-btn{width:52px;height:52px}
+#race .moflin-btn svg,#vehicle .moflin-btn svg{width:42px;height:42px}
+.rstage{flex:1;min-height:0;position:relative;padding:4px 10px 6px}
+#lanes{
+  position:relative;height:100%;border-radius:22px;overflow:hidden;
+  display:grid;grid-template-rows:repeat(4,minmax(0,1fr));box-shadow:0 5px 0 var(--shadow);
+}
+.lane{position:relative;overflow:hidden;touch-action:none}
+.lane.mine::after{content:"";position:absolute;inset:0;border:3px solid rgba(255,255,255,.9);box-shadow:inset 0 0 0 2px rgba(255,200,61,.95);pointer-events:none;z-index:3}
+.racer{position:absolute;left:0;top:0;width:var(--vw);height:var(--vh);will-change:transform;pointer-events:none;z-index:2}
+.rbody{width:100%;height:100%;transform-origin:50% 90%}
+.rbody svg{display:block;width:100%;height:100%;overflow:visible}
+.prop{transform-box:fill-box;transform-origin:center;animation:prop .1s linear infinite}
+.puff{position:absolute;border-radius:50%;pointer-events:none;z-index:1}
+.startline{position:absolute;top:0;bottom:0;left:var(--sl,20px);width:4px;background:rgba(255,255,255,.8);z-index:1;pointer-events:none}
+.finishline{position:absolute;top:0;bottom:0;left:var(--fin,280px);width:14px;background:repeating-conic-gradient(#33285A 0 25%,#fff 0 50%) 0 0/14px 14px;z-index:1;pointer-events:none}
+.medal{
+  position:absolute;top:50%;left:calc(var(--fin,280px) + 22px);width:34px;height:34px;margin-top:-17px;border-radius:50%;
+  display:grid;place-items:center;font-weight:600;font-size:20px;color:#33285A;box-shadow:0 3px 0 rgba(0,0,0,.22);z-index:4;
+}
+.medal.m1{background:#FFC83D}.medal.m2{background:#D5DBE6}.medal.m3{background:#E0A06A}.medal.m4{background:#C8CCF5}
+#countdown{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);width:124px;height:124px;border-radius:50%;
+  display:grid;place-items:center;font-size:58px;font-weight:600;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.22);pointer-events:none;z-index:6;
+}
+/* the four racing tracks */
+.t-car .lane{background:linear-gradient(#5B5F7A,#5B5F7A)}
+.t-car .lane::before{content:"";position:absolute;left:0;right:0;bottom:2px;height:4px;background:repeating-linear-gradient(90deg,rgba(255,255,255,.8) 0 22px,transparent 22px 44px)}
+.t-train .lane{background:
+  linear-gradient(#9AA0AE,#9AA0AE) 0 60%/100% 3px no-repeat,
+  linear-gradient(#9AA0AE,#9AA0AE) 0 82%/100% 3px no-repeat,
+  repeating-linear-gradient(90deg,#8A6A4A 0 8px,transparent 8px 26px) 0 56%/100% 32% no-repeat,#D4C39B}
+.t-plane .lane{background:
+  radial-gradient(ellipse 30px 12px at 14% 34%,rgba(255,255,255,.9) 62%,transparent 64%),
+  radial-gradient(ellipse 22px 9px at 46% 22%,rgba(255,255,255,.85) 62%,transparent 64%),
+  radial-gradient(ellipse 28px 11px at 71% 40%,rgba(255,255,255,.9) 62%,transparent 64%),
+  linear-gradient(#A9D8F5,#CBEAFB)}
+.t-plane .lane:nth-child(even){filter:brightness(1.04)}
+.t-horse .lane{background:
+  repeating-linear-gradient(90deg,#A9754A 0 5px,transparent 5px 36px) 0 0/100% 16px no-repeat,
+  linear-gradient(#A9754A,#A9754A) 0 12px/100% 3px no-repeat,
+  linear-gradient(transparent 26%,#E7C994 26% 96%,transparent 96%),#8FD08B}
+.t-horse .lane:nth-child(even){background-color:#9BDA97}
+@keyframes prop{50%{transform:scaleY(.35)}}
+
+/* ---------- spelling ---------- */
+#spell .bar{gap:8px;padding:8px 10px}
+#spell .icon-btn{width:52px;height:52px}
+#spell .moflin-btn svg{width:42px;height:42px}
+#sboard{flex:1;min-height:0;position:relative;margin:0 10px 8px;touch-action:none;--b:80px}
+.spic{
+  position:absolute;border:0;padding:0;border-radius:28px;background:#fff;box-shadow:0 6px 0 var(--shadow);
+  display:grid;place-items:center;cursor:pointer;overflow:hidden;touch-action:manipulation;
+}
+.spic span{line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;pointer-events:none}
+.sband{position:absolute;border-radius:26px;background:rgba(255,255,255,.42);pointer-events:none}
+.sslot{
+  position:absolute;border-radius:calc(var(--b)*.24);border:3px dashed rgba(51,40,90,.4);background:rgba(255,255,255,.6);
+  pointer-events:none;transition:background .12s,border-color .12s;
+}
+.sslot.hot{background:rgba(255,200,61,.55);border-color:#FFC83D}
+.sslot.ok{border-color:transparent;background:transparent}
+.sblock{
+  position:absolute;left:0;top:0;width:var(--b);height:var(--b);border-radius:calc(var(--b)*.24);
+  display:grid;place-items:center;color:#fff;font-weight:600;line-height:1;cursor:grab;touch-action:none;
+  font-family:"Fredoka","Trebuchet MS",system-ui,sans-serif;font-size:calc(var(--b)*.62);
+  box-shadow:0 5px 0 rgba(0,0,0,.2);will-change:transform;-webkit-user-select:none;user-select:none;
+}
+.sblock::after{content:"";position:absolute;inset:7%;border-radius:calc(var(--b)*.2);border:2px solid rgba(255,255,255,.4);pointer-events:none}
+.sblock.lift{cursor:grabbing;box-shadow:0 12px 14px rgba(0,0,0,.25);z-index:5}
+.sblock.placed{cursor:default}
+.smoflin{position:absolute;cursor:pointer}
+.smoj{width:100%;height:100%;transform-origin:50% 85%}
+.smoj svg{display:block;width:100%;height:100%;overflow:visible;animation:breathe 3.6s ease-in-out infinite;transform-origin:50% 88%}
+.snext{
+  position:absolute;border-radius:50%;border:0;cursor:pointer;background:var(--heart);color:#fff;
+  display:grid;place-items:center;box-shadow:0 4px 0 rgba(0,0,0,.2);visibility:hidden;opacity:0;transform:scale(.6);
+}
+.snext svg{width:56%;height:56%;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.snext.show{visibility:visible;animation:pop .5s cubic-bezier(.2,1.6,.4,1) forwards}
+@keyframes tilePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.035)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3.5%)}}
+@keyframes breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.018,1.035)}}
+@keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.08)}}
+@keyframes glow{0%,100%{opacity:.3;transform:scale(.92)}50%{opacity:.65;transform:scale(1.12)}}
+@keyframes ring{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.7);opacity:0}}
+@keyframes pop{to{transform:scale(1);opacity:1}}
+@keyframes flow{to{stroke-dashoffset:-.35}}
+@keyframes swirl{to{transform:rotate(360deg)}}
+
+@media (max-height:560px){
+  .bar{min-height:56px;padding:4px 10px}
+  .icon-btn{width:46px;height:46px}
+  .footer{min-height:64px}
+  .again{width:56px;height:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .pick .bob,.tile .art,.eyes-open,.goal-glow,.jumper svg,#dm svg,.smoj svg,.tube-flow,.swirl{animation:none!important}
+  #moflin.invite .ring{animation:none;opacity:.8}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <section id="home" class="screen">
+    <h1>Moflin Play</h1>
+    <div class="tiles" id="tiles"></div>
+  </section>
+
+  <section id="pick" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="pickHome" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+    </div>
+    <h1 id="pickTitle">Moflin Maze</h1>
+    <div class="choices" id="choices"></div>
+  </section>
+
+  <section id="play" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="homeBtn" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+      <button class="icon-btn moflin-btn" id="moflinBtn" type="button" aria-label="Choose a different Moflin"></button>
+      <div class="grow"></div>
+      <button class="icon-btn" id="soundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+      <button class="icon-btn" id="newBtn" type="button" aria-label="New maze">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+      </button>
+    </div>
+
+    <div id="stage">
+      <div id="board">
+        <div id="floor"></div>
+        <svg id="maze" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+        <div id="moflin" role="button" tabindex="0" aria-label="Moflin">
+          <div class="mshadow"></div>
+          <div class="ring"></div>
+          <div class="tilt"><div class="jumper" id="jumper"></div></div>
+        </div>
+        <svg id="nestFront" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+        <div id="hand" aria-hidden="true">
+          <svg viewBox="-4 -2 72 78" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <g id="handShapes">
+                <rect x="25" y="4" width="14" height="36" rx="7"/>
+                <rect x="14" y="30" width="40" height="38" rx="16"/>
+                <rect x="36" y="27" width="10" height="18" rx="5"/>
+                <rect x="45" y="31" width="10" height="16" rx="5"/>
+                <rect x="6" y="38" width="14" height="24" rx="7" transform="rotate(-28 13 50)"/>
+              </g>
+            </defs>
+            <g stroke="#33285A" stroke-width="6" stroke-linejoin="round" fill="#33285A"><use href="#handShapes"/></g>
+            <g fill="#FFFFFF"><use href="#handShapes"/></g>
+            <path d="M36.5 36v9M45.5 38v7" stroke="#33285A" stroke-width="2" stroke-linecap="round" fill="none"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <button class="again" id="againBtn" type="button" aria-label="Play again">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+      </button>
+    </div>
+  </section>
+  <section id="dress" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="dHomeBtn" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+      <button class="icon-btn moflin-btn" id="dMoflinBtn" type="button" aria-label="Choose a different Moflin"></button>
+      <div class="grow"></div>
+      <button class="icon-btn" id="dSoundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+      <button class="icon-btn" id="clearBtn" type="button" aria-label="Take everything off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 7.5a2.2 2.2 0 1 1 2.2 2.2c-1.2.4-2.2 1.2-2.2 2.4v1"/><path d="M12 13 3.5 18.5h17z"/></svg>
+      </button>
+      <button class="icon-btn camera" id="cameraBtn" type="button" aria-label="Take a photo">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2.5h7L17 8h3v11H4z"/><circle cx="12" cy="13.5" r="3.6"/></svg>
+      </button>
+    </div>
+    <div id="dstage">
+      <div id="dwrap"><div class="rug"></div><div class="dshadow" id="dshadow"></div><div id="dm"></div></div>
+    </div>
+    <div class="tray"><div class="tabs" id="tabs"></div><div class="items" id="items"></div></div>
+  </section>
+  <section id="vehicle" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="vHomeBtn" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+      <button class="icon-btn moflin-btn" id="vMoflinBtn" type="button" aria-label="Choose a different Moflin"></button>
+    </div>
+    <h1>Moflin Races</h1>
+    <div class="tiles" id="vtiles"></div>
+  </section>
+
+  <section id="race" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="rHomeBtn" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+      <button class="icon-btn moflin-btn" id="rMoflinBtn" type="button" aria-label="Choose a different Moflin"></button>
+      <button class="icon-btn moflin-btn" id="rVehicleBtn" type="button" aria-label="Choose a different vehicle"></button>
+      <div class="grow"></div>
+      <button class="icon-btn" id="rSoundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+    </div>
+    <div class="rstage"><div id="lanes"></div><div id="countdown" hidden></div></div>
+    <div class="footer">
+      <button class="again" id="rAgainBtn" type="button" aria-label="Race again">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9"/><path d="M20 4v5h-5"/></svg>
+      </button>
+    </div>
+  </section>
+  <section id="spell" class="screen" hidden>
+    <div class="bar">
+      <button class="icon-btn" id="sHomeBtn" type="button" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/></svg>
+      </button>
+      <button class="icon-btn moflin-btn" id="sMoflinBtn" type="button" aria-label="Choose a different Moflin"></button>
+      <div class="grow"></div>
+      <button class="icon-btn" id="sSoundBtn" type="button" aria-label="Sound on" aria-pressed="true"></button>
+    </div>
+    <div id="sboard"></div>
+  </section>
+</div>
+
+<div id="fx" aria-hidden="true"></div>
+<div id="flash"></div>
+<div id="dhand" aria-hidden="true"></div>
+<div id="sr" class="sr" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
+
+/*LOGIC-START*/
+// Maze logic. Everything is measured in "tiles" (1 tile = 1 grid square).
+const WALL_W = 0.72, HALF = WALL_W / 2, RAD = 0.38, MINDIST = HALF + RAD;
+const HURDLE_MIN = 0.5;
+const CHUTE_COLORS = ['#8E6BE8', '#3E9BF2', '#F2A93B'];
+let g = null, COLS = 0, ROWS = 0, segs = [], hsegs = [], hurdles = [], chutes = [], ladders = [];
+let goal = {x:0, y:0}, distGoal = null;
+const pos = {x:1.5, y:1.5};
+
+function shuffle(a){
+  for (let i = a.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function bfs(sx, sy){
+  const d = Array.from({length:ROWS}, () => Array(COLS).fill(-1));
+  const q = [[sx, sy]];
+  d[sy][sx] = 0;
+  for (let i = 0; i < q.length; i++){
+    const [x, y] = q[i];
+    for (const [dx, dy] of DIRS){
+      const nx = x + dx, ny = y + dy;
+      if (g[ny][nx] === 0 && d[ny][nx] < 0){ d[ny][nx] = d[y][x] + 1; q.push([nx, ny]); }
+    }
+  }
+  return d;
+}
+
+// can the goal be reached from the start if these tiles are closed?
+function reachable(blocked){
+  const gx = Math.floor(goal.x), gy = Math.floor(goal.y);
+  const seen = new Set(['1,1']), q = [[1, 1]];
+  for (let i = 0; i < q.length; i++){
+    const [x, y] = q[i];
+    if (x === gx && y === gy) return true;
+    for (const [dx, dy] of DIRS){
+      const nx = x + dx, ny = y + dy, key = nx + ',' + ny;
+      if (g[ny][nx] === 0 && !seen.has(key) && !blocked.has(key)){ seen.add(key); q.push([nx, ny]); }
+    }
+  }
+  return false;
+}
+
+function tracePath(){
+  const p = [[1, 1]];
+  let x = 1, y = 1;
+  while (distGoal[y][x] > 0){
+    let nxt = null;
+    for (const [dx, dy] of DIRS){
+      const nx = x + dx, ny = y + dy;
+      if (g[ny][nx] === 0 && distGoal[ny][nx] === distGoal[y][x] - 1){ nxt = [nx, ny]; break; }
+    }
+    if (!nxt) break;
+    x = nxt[0]; y = nxt[1]; p.push([x, y]);
+  }
+  return p;
+}
+
+function buildOnce(w, h, feat){
+  COLS = 2 * w + 1; ROWS = 2 * h + 1;
+  g = Array.from({length:ROWS}, () => Array(COLS).fill(1));
+  const seen = Array.from({length:h}, () => Array(w).fill(false));
+  const stack = [[0, 0]];
+  seen[0][0] = true; g[1][1] = 0;
+  while (stack.length){
+    const [cx, cy] = stack[stack.length - 1];
+    const opts = [];
+    for (const [dx, dy] of DIRS){
+      const nx = cx + dx, ny = cy + dy;
+      if (nx >= 0 && ny >= 0 && nx < w && ny < h && !seen[ny][nx]) opts.push([nx, ny, dx, dy]);
+    }
+    if (!opts.length){ stack.pop(); continue; }
+    const [nx, ny, dx, dy] = opts[Math.floor(Math.random() * opts.length)];
+    g[2*cy + 1 + dy][2*cx + 1 + dx] = 0;
+    g[2*ny + 1][2*nx + 1] = 0;
+    seen[ny][nx] = true;
+    stack.push([nx, ny]);
+  }
+  // a few extra doorways so there is more than one way round
+  const cand = [];
+  for (let y = 1; y < ROWS - 1; y++){
+    for (let x = 1; x < COLS - 1; x++){
+      if (g[y][x] === 1 && ((x % 2 === 1 && y % 2 === 0) || (x % 2 === 0 && y % 2 === 1))) cand.push([x, y]);
+    }
+  }
+  shuffle(cand);
+  const extra = Math.max(1, Math.round(w * h / 9));
+  for (let i = 0; i < extra && i < cand.length; i++) g[cand[i][1]][cand[i][0]] = 0;
+
+  // the heart cushion goes in the cell furthest from the start
+  const d0 = bfs(1, 1);
+  let best = [1, 1], bd = -1;
+  for (let y = 1; y < ROWS; y += 2){
+    for (let x = 1; x < COLS; x += 2){
+      if (d0[y][x] > bd){ bd = d0[y][x]; best = [x, y]; }
+    }
+  }
+  goal = {x: best[0] + 0.5, y: best[1] + 0.5};
+  distGoal = bfs(best[0], best[1]);
+
+  // wall skeleton: line segments joining the centres of neighbouring wall tiles
+  segs = [];
+  for (let y = 0; y < ROWS; y++){
+    for (let x = 0; x < COLS; x++){
+      if (g[y][x] !== 1) continue;
+      const cx = x + 0.5, cy = y + 0.5;
+      let linked = false;
+      if (x + 1 < COLS && g[y][x + 1] === 1){ segs.push([cx, cy, cx + 1, cy, MINDIST]); linked = true; }
+      if (y + 1 < ROWS && g[y + 1][x] === 1){ segs.push([cx, cy, cx, cy + 1, MINDIST]); linked = true; }
+      if (!linked && ((x > 0 && g[y][x - 1] === 1) || (y > 0 && g[y - 1][x] === 1))) linked = true;
+      if (!linked) segs.push([cx, cy, cx, cy, MINDIST]);
+    }
+  }
+  placeExtras(w, h, feat);
+}
+
+// build a maze with the requested extras; try again (a few times) if some could not be placed
+function buildMaze(w, h, feat = {hurdles:1, chutes:1, ladders:1}){
+  for (let attempt = 0; attempt < 30; attempt++){
+    buildOnce(w, h, feat);
+    if (hurdles.length >= feat.hurdles && chutes.length >= feat.chutes && ladders.length >= feat.ladders) break;
+  }
+}
+
+// hurdles sit on the route (and only where there is no way round);
+// chute mouths sit off the route and slide you back to an earlier spot
+function placeExtras(w, h, feat){
+  hurdles = []; hsegs = []; chutes = []; ladders = [];
+  const path = tracePath();
+  const onPath = new Set(path.map(p => p[0] + ',' + p[1]));
+
+  const wantH = feat.hurdles;
+  const idxs = [];
+  for (let i = 3; i < path.length - 3; i++){
+    const [x, y] = path[i];
+    if ((x % 2 === 0 && y % 2 === 1) || (x % 2 === 1 && y % 2 === 0)) idxs.push(i);
+  }
+  shuffle(idxs);
+  const chosen = [];
+  for (const i of idxs){
+    if (chosen.length >= wantH) break;
+    if (chosen.some(j => Math.abs(j - i) < 6)) continue;
+    const [x, y] = path[i];
+    if (reachable(new Set([x + ',' + y]))) continue;
+    chosen.push(i);
+  }
+  for (const i of chosen){
+    const [x, y] = path[i];
+    const axis = (y % 2 === 1) ? 'x' : 'y';
+    const cx = x + 0.5, cy = y + 0.5;
+    hurdles.push({x, y, cx, cy, axis});
+    hsegs.push(axis === 'x' ? [cx, cy - 0.7, cx, cy + 0.7, HURDLE_MIN] : [cx - 0.7, cy, cx + 0.7, cy, HURDLE_MIN]);
+  }
+
+  // regions separated by hurdles, so a chute can never carry you past one
+  const d0 = bfs(1, 1);
+  const closed = new Set(hurdles.map(hd => hd.x + ',' + hd.y));
+  const comp = Array.from({length:ROWS}, () => Array(COLS).fill(-1)), compMin = [];
+  for (let y = 0; y < ROWS; y++){
+    for (let x = 0; x < COLS; x++){
+      if (g[y][x] !== 0 || comp[y][x] >= 0 || closed.has(x + ',' + y)) continue;
+      const id = compMin.length, q = [[x, y]];
+      let mn = Infinity;
+      comp[y][x] = id;
+      for (let i = 0; i < q.length; i++){
+        const [cx, cy] = q[i];
+        mn = Math.min(mn, d0[cy][cx]);
+        for (const [dx, dy] of DIRS){
+          const nx = cx + dx, ny = cy + dy;
+          if (g[ny][nx] === 0 && comp[ny][nx] < 0 && !closed.has(nx + ',' + ny)){ comp[ny][nx] = id; q.push([nx, ny]); }
+        }
+      }
+      compMin.push(mn);
+    }
+  }
+
+  // ladders lift you forward (never past a hurdle): one shortcut on the route, one reward in a side branch
+  const used = new Set();
+  const key = (x, y) => x + ',' + y;
+  const routeCells = [];
+  path.forEach((p, i) => { if (p[0] % 2 === 1 && p[1] % 2 === 1) routeCells.push(i); });
+  const kinds = feat.ladders <= 0 ? [] : feat.ladders >= 2 ? ['route', 'side'] : [Math.random() < 0.5 ? 'route' : 'side'];
+  for (const kind of kinds){
+    let made = false;
+    const addLadder = (bx, by, tx, ty) => {
+      ladders.push({bx: bx + 0.5, by: by + 0.5, tx: tx + 0.5, ty: ty + 0.5, kind});
+      used.add(key(bx, by)); used.add(key(tx, ty)); made = true;
+    };
+    if (kind === 'route'){
+      for (const i of shuffle(routeCells.slice())){
+        if (made) break;
+        if (i < 2) continue;
+        for (const j of shuffle(routeCells.slice())){
+          if (j < i + 6 || j > i + 14 || j > path.length - 3) continue;
+          if (chosen.some(k => k > i && k <= j)) continue;
+          const [bx, by] = path[i], [tx, ty] = path[j];
+          if (Math.hypot(tx - bx, ty - by) < 3 || used.has(key(bx, by)) || used.has(key(tx, ty))) continue;
+          addLadder(bx, by, tx, ty);
+          break;
+        }
+      }
+    } else {
+      const bottoms = [];
+      for (let y = 1; y < ROWS; y += 2){
+        for (let x = 1; x < COLS; x += 2){
+          if (g[y][x] === 0 && !onPath.has(key(x, y)) && d0[y][x] >= 4) bottoms.push([x, y]);
+        }
+      }
+      const isDead = ([x, y]) => DIRS.filter(([dx, dy]) => g[y + dy][x + dx] === 0).length === 1;
+      for (const [x, y] of shuffle(bottoms.filter(isDead)).concat(shuffle(bottoms.filter(b => !isDead(b))))){
+        if (made) break;
+        if (used.has(key(x, y))) continue;
+        for (const j of shuffle(routeCells.slice())){
+          if (j > path.length - 3) continue;
+          const [tx, ty] = path[j];
+          if (used.has(key(tx, ty)) || comp[ty][tx] !== comp[y][x]) continue;
+          if (distGoal[ty][tx] > distGoal[y][x] - 6 || Math.hypot(tx - x, ty - y) < 3) continue;
+          addLadder(x, y, tx, ty);
+          break;
+        }
+      }
+    }
+  }
+
+  const wantC = feat.chutes;
+  const deg = (x, y) => DIRS.filter(([dx, dy]) => g[y + dy][x + dx] === 0).length;
+  const cells = [];
+  for (let y = 1; y < ROWS; y += 2){
+    for (let x = 1; x < COLS; x += 2){
+      if (g[y][x] === 0 && !onPath.has(x + ',' + y) && d0[y][x] >= 8) cells.push([x, y]);
+    }
+  }
+  const order = shuffle(cells.filter(([x, y]) => deg(x, y) === 1)).concat(shuffle(cells.filter(([x, y]) => deg(x, y) !== 1)));
+  for (const [x, y] of order){
+    if (chutes.length >= wantC) break;
+    if (used.has(x + ',' + y)) continue;
+    if (chutes.some(c => Math.abs(c.hx - (x + 0.5)) + Math.abs(c.hy - (y + 0.5)) < 4)) continue;
+    const opts = [];
+    for (let y2 = 1; y2 < ROWS; y2 += 2){
+      for (let x2 = 1; x2 < COLS; x2 += 2){
+        if (g[y2][x2] !== 0 || used.has(x2 + ',' + y2)) continue;
+        if (d0[y2][x2] > d0[y][x] - 6) continue;
+        if (compMin[comp[y2][x2]] > compMin[comp[y][x]]) continue;
+        if (Math.hypot(x2 - x, y2 - y) < 3) continue;
+        opts.push([x2, y2]);
+      }
+    }
+    if (!opts.length) continue;
+    const [tx, ty] = opts[Math.floor(Math.random() * opts.length)];
+    chutes.push({hx: x + 0.5, hy: y + 0.5, tx: tx + 0.5, ty: ty + 0.5, color: CHUTE_COLORS[chutes.length]});
+    used.add(x + ',' + y); used.add(tx + ',' + ty);
+  }
+}
+
+// the twisty tube a chute follows from its mouth to its exit (a smooth wiggly line)
+function chuteCurve(c){
+  const dx = c.tx - c.hx, dy = c.ty - c.hy, len = Math.hypot(dx, dy) || 1;
+  const nx = -dy / len, ny = dx / len, amp = Math.min(1.5, len * 0.2);
+  const ctrl = [[c.hx, c.hy]];
+  for (const [f, sgn] of [[0.25, 1], [0.5, -1], [0.75, 1]]){
+    ctrl.push([clamp(c.hx + dx * f + nx * amp * sgn, 0.7, COLS - 0.7), clamp(c.hy + dy * f + ny * amp * sgn, 0.7, ROWS - 0.7)]);
+  }
+  ctrl.push([c.tx, c.ty]);
+  const pts = [];
+  for (let i = 0; i < ctrl.length - 1; i++){
+    const p0 = ctrl[Math.max(0, i - 1)], p1 = ctrl[i], p2 = ctrl[i + 1], p3 = ctrl[Math.min(ctrl.length - 1, i + 2)];
+    for (let k = 0; k < 12; k++){
+      const t = k / 12, t2 = t * t, t3 = t2 * t;
+      const cr = j => 0.5 * (2 * p1[j] + (p2[j] - p0[j]) * t + (2 * p0[j] - 5 * p1[j] + 4 * p2[j] - p3[j]) * t2 + (3 * p1[j] - p0[j] - 3 * p2[j] + p3[j]) * t3);
+      pts.push([cr(0), cr(1)]);
+    }
+  }
+  pts.push([c.tx, c.ty]);
+  return pts;
+}
+function pathLen(pts){
+  let L = 0;
+  for (let i = 1; i < pts.length; i++) L += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+  return L;
+}
+// a point a fraction u (0..1) of the way along the tube
+function pathAt(pts, u){
+  let want = clamp(u, 0, 1) * pathLen(pts);
+  for (let i = 1; i < pts.length; i++){
+    const seg = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
+    if (want <= seg || i === pts.length - 1){
+      const r = seg > 0 ? clamp(want / seg, 0, 1) : 0;
+      return [pts[i - 1][0] + (pts[i][0] - pts[i - 1][0]) * r, pts[i - 1][1] + (pts[i][1] - pts[i - 1][1]) * r];
+    }
+    want -= seg;
+  }
+  return pts[pts.length - 1];
+}
+
+// push the Moflin out of any wall or hurdle it overlaps, so it slides along them
+function resolve(){
+  for (let it = 0; it < 3; it++){
+    let moved = false;
+    for (const list of [segs, hsegs]){
+      for (let i = 0; i < list.length; i++){
+        const s = list[i];
+        if (Math.abs(pos.x - (s[0] + s[2]) / 2) > 2 || Math.abs(pos.y - (s[1] + s[3]) / 2) > 2) continue;
+        const abx = s[2] - s[0], aby = s[3] - s[1], l2 = abx * abx + aby * aby;
+        let t = l2 > 0 ? ((pos.x - s[0]) * abx + (pos.y - s[1]) * aby) / l2 : 0;
+        t = t < 0 ? 0 : t > 1 ? 1 : t;
+        const cx = s[0] + abx * t, cy = s[1] + aby * t;
+        let ox = pos.x - cx, oy = pos.y - cy;
+        const d = Math.hypot(ox, oy);
+        if (d < s[4]){
+          if (d < 1e-6){ ox = 1; oy = 0; } else { ox /= d; oy /= d; }
+          pos.x = cx + ox * s[4]; pos.y = cy + oy * s[4];
+          moved = true;
+        }
+      }
+    }
+    if (!moved) break;
+  }
+}
+
+// move toward a target in small steps so it can never skip through a wall
+function stepToward(tx, ty, maxMove){
+  const dx = tx - pos.x, dy = ty - pos.y, d = Math.hypot(dx, dy);
+  if (d < 1e-4) return;
+  const m = Math.min(d, maxMove), n = Math.max(1, Math.ceil(m / 0.07));
+  const sx = dx / d * m / n, sy = dy / d * m / n;
+  for (let i = 0; i < n; i++){ pos.x += sx; pos.y += sy; resolve(); }
+}
+
+// is the Moflin right beside a hurdle (on either side)?
+function nearHurdle(){
+  for (const h of hurdles){
+    const a = h.axis === 'x' ? pos.x - h.cx : pos.y - h.cy;
+    const l = h.axis === 'x' ? pos.y - h.cy : pos.x - h.cx;
+    if (Math.abs(a) <= 0.95 && Math.abs(l) <= 0.55) return h;
+  }
+  return null;
+}
+// ...and is that hurdle in the way of the goal?
+function hurdleAhead(){
+  const h = nearHurdle();
+  if (!h) return null;
+  const a = h.axis === 'x' ? pos.x - h.cx : pos.y - h.cy, s = a >= 0 ? 1 : -1;
+  const mine  = h.axis === 'x' ? distGoal[h.y][h.x + s] : distGoal[h.y + s][h.x];
+  const other = h.axis === 'x' ? distGoal[h.y][h.x - s] : distGoal[h.y - s][h.x];
+  return mine > other ? h : null;
+}
+// where a jump over a hurdle lands: the same distance on the far side
+function jumpLanding(h){
+  const a = h.axis === 'x' ? pos.x - h.cx : pos.y - h.cy;
+  const l = h.axis === 'x' ? pos.y - h.cy : pos.x - h.cx;
+  const s = a >= 0 ? 1 : -1, la = clamp(l, -0.25, 0.25);
+  return h.axis === 'x' ? {x: h.cx - s * 0.8, y: h.cy + la} : {x: h.cx + la, y: h.cy - s * 0.8};
+}
+function ladderAt(){
+  for (const l of ladders) if (Math.hypot(pos.x - l.bx, pos.y - l.by) < 0.4) return l;
+  return null;
+}
+function chuteAt(){
+  for (const c of chutes) if (Math.hypot(pos.x - c.hx, pos.y - c.hy) < 0.4) return c;
+  return null;
+}
+/*LOGIC-END*/
+
+// ---------- characters ----------
+const THEMES = {
+  gold:    {label:'Golden Moflin',  base:'#E8A241', light:'#F8D28A', dark:'#B9741F', belly:'#FFF0CE', blush:'#F0855A'},
+  silver:  {label:'Silver Moflin',  base:'#B0B8C6', light:'#E4E8F0', dark:'#7F889B', belly:'#F5F7FB', blush:'#E99AB2'},
+  pink:    {label:'Pink Moflin',    base:'#F29DBB', light:'#FCD5E3', dark:'#D06B92', belly:'#FFEFF4', blush:'#EF6F9A'},
+  rainbow: {label:'Rainbow Moflin', base:'#FFC86B', light:'#FFF1C9', dark:'#7B5FBF', belly:'#FFF9FF', blush:'#FF7FA5', rainbow:true}
+};
+const RAINBOW = ['#FF8A9B', '#FFB067', '#FFE27A', '#8EE0A0', '#7CC6F7', '#B39CFF'];
+
+const f2 = n => Math.round(n * 100) / 100;
+function rnd(seed){ const x = Math.sin(seed * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+// a wobbly, fluffy outline
+function furPath(rx, ry, tufts, amp, seed){
+  const n = tufts * 2, pts = [];
+  for (let i = 0; i < n; i++){
+    const a = (i / n) * Math.PI * 2 - Math.PI / 2;
+    const k = ((i % 2 === 0) ? 1 + amp : 1 - amp * 0.7) * (1 + (rnd(seed * 31 + i) - 0.5) * 0.03);
+    pts.push([Math.cos(a) * rx * k, Math.sin(a) * ry * k]);
+  }
+  const mid = (p, q) => [(p[0] + q[0]) / 2, (p[1] + q[1]) / 2];
+  const m0 = mid(pts[n - 1], pts[0]);
+  let d = `M${f2(m0[0])} ${f2(m0[1])}`;
+  for (let i = 0; i < n; i++){
+    const p = pts[i], m = mid(p, pts[(i + 1) % n]);
+    d += `Q${f2(p[0])} ${f2(p[1])} ${f2(m[0])} ${f2(m[1])}`;
+  }
+  return d + 'Z';
+}
+
+function moflinInner(t, id){
+  let sk = '';
+  for (let i = 0; i < 40; i++){
+    const a = rnd(i * 3 + 1) * Math.PI * 2, rr = 0.2 + rnd(i * 3 + 2) * 0.7;
+    const x = Math.cos(a) * rr * 38, y = Math.sin(a) * rr * 42;
+    if (Math.abs(x) < 26 && y > -18 && y < 8) continue;
+    const len = 4.5 + rnd(i * 3 + 3) * 4.5, dx = Math.cos(a) * len, dy = Math.sin(a) * len;
+    sk += `M${f2(x)} ${f2(y)}q${f2(dx * .5 - dy * .3)} ${f2(dy * .5 + dx * .3)} ${f2(dx)} ${f2(dy)}`;
+  }
+  const body = furPath(42, 46, 15, .055, 1);
+  let defs, over = '';
+  if (t.rainbow){
+    let stops = `<stop offset="0" stop-color="${RAINBOW[0]}"/>`;
+    RAINBOW.forEach((c, i) => {
+      stops += `<stop offset="${f2(i / 6 + 0.02)}" stop-color="${c}"/><stop offset="${f2((i + 1) / 6 - 0.02)}" stop-color="${c}"/>`;
+    });
+    stops += `<stop offset="1" stop-color="${RAINBOW[5]}"/>`;
+    defs = `<linearGradient id="mg-${id}" x1=".05" y1=".12" x2=".95" y2=".88">${stops}</linearGradient>` +
+           `<radialGradient id="mo-${id}" cx=".42" cy=".3" r=".85"><stop offset="0" stop-color="#fff" stop-opacity=".38"/><stop offset=".55" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#4B3A80" stop-opacity=".3"/></radialGradient>`;
+    over = `<path d="${body}" fill="url(#mo-${id})"/>`;
+  } else {
+    defs = `<radialGradient id="mg-${id}" cx=".42" cy=".3" r=".85"><stop offset="0" stop-color="${t.light}"/><stop offset=".6" stop-color="${t.base}"/><stop offset="1" stop-color="${t.dark}"/></radialGradient>`;
+  }
+  return `<defs>${defs}</defs>
+<path d="${body}" fill="url(#mg-${id})" stroke="${t.dark}" stroke-opacity=".45" stroke-width="1.2" stroke-linejoin="round"/>
+${over}
+<path d="${sk}" fill="none" stroke="${t.dark}" stroke-opacity=".38" stroke-width="1.6" stroke-linecap="round"/>
+<path d="${furPath(24, 19, 9, .07, 4)}" transform="translate(0 25)" fill="${t.belly}" fill-opacity=".92"/>
+<ellipse cx="-28" cy="6" rx="6.5" ry="4.4" fill="${t.blush}" fill-opacity=".42"/>
+<ellipse cx="28" cy="6" rx="6.5" ry="4.4" fill="${t.blush}" fill-opacity=".42"/>
+<g class="eyes-open"><circle cx="-15" cy="-6" r="6.3" fill="#2A2036"/><circle cx="15" cy="-6" r="6.3" fill="#2A2036"/><circle cx="-13" cy="-8.2" r="2.1" fill="#fff"/><circle cx="17" cy="-8.2" r="2.1" fill="#fff"/></g>
+<g class="eyes-happy"><path d="M-21.5 -3.5Q-15 -13.5 -8.5 -3.5" fill="none" stroke="#2A2036" stroke-width="3.6" stroke-linecap="round"/><path d="M8.5 -3.5Q15 -13.5 21.5 -3.5" fill="none" stroke="#2A2036" stroke-width="3.6" stroke-linecap="round"/></g>`;
+}
+function moflinSVG(t, id){
+  return `<svg viewBox="-60 -60 120 120" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${moflinInner(t, id)}</svg>`;
+}
+
+// ---------- elements ----------
+const home = $('#home'), tiles = $('#tiles'), pick = $('#pick'), play = $('#play'), choices = $('#choices');
+const moflinBtn = $('#moflinBtn'), pickTitle = $('#pickTitle');
+const board = $('#board'), mazeSvg = $('#maze'), moflinEl = $('#moflin');
+const jumperEl = $('#jumper'), tiltEl = moflinEl.querySelector('.tilt'), shadowEl = moflinEl.querySelector('.mshadow');
+const hand = $('#hand'), fx = $('#fx'), againBtn = $('#againBtn'), soundBtn = $('#soundBtn'), sr = $('#sr');
+const stage = $('#stage'), nestFront = $('#nestFront');
+const reduceMotion = () => !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+// ---------- sound ----------
+let actx = null, soundOn = true;
+function audio(){
+  if (!actx){ const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+  if (actx && actx.state === 'suspended') actx.resume();
+  return actx;
+}
+function tone(fa, fb, dur, o = {}){
+  if (!soundOn) return;
+  const ac = audio(); if (!ac) return;
+  const t0 = ac.currentTime + (o.delay || 0), gain = o.gain || 0.1;
+  const osc = ac.createOscillator(), gn = ac.createGain();
+  osc.type = o.type || 'sine';
+  osc.frequency.setValueAtTime(fa, t0);
+  osc.frequency.exponentialRampToValueAtTime(fb, t0 + dur * 0.8);
+  gn.gain.setValueAtTime(0.0001, t0);
+  gn.gain.exponentialRampToValueAtTime(gain, t0 + 0.02);
+  gn.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  osc.connect(gn); gn.connect(ac.destination);
+  osc.start(t0); osc.stop(t0 + dur + 0.05);
+}
+const chirp = () => { tone(900, 1500, .11, {gain:.09}); tone(1100, 1800, .12, {gain:.08, delay:.13}); };
+const pip = () => tone(1000, 1400, .09, {gain:.07});
+const squeak = p => tone(700 * p, 1300 * p, .16, {type:'triangle', gain:.09});
+const jingle = () => [523.25, 659.25, 783.99, 1046.5].forEach((fr, i) => tone(fr, fr * 1.01, .3, {type:'triangle', gain:.11, delay:i * .14}));
+const whee = () => tone(1300, 260, .9, {type:'triangle', gain:.09, delay:.25});
+const climbSound = () => { for (let i = 0; i < 6; i++) tone(520 + i * 110, 560 + i * 110, .1, {type:'triangle', gain:.07, delay:.2 + i * .15}); };
+
+const ICON_ON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M15.5 9.2a4 4 0 0 1 0 5.6"/><path d="M18 7a7.5 7.5 0 0 1 0 10"/></svg>';
+const ICON_OFF = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9.5h3.5L12 6v12l-4.5-3.5H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/></svg>';
+const soundBtns = [soundBtn, $('#dSoundBtn'), $('#rSoundBtn'), $('#sSoundBtn')];
+function paintSound(){
+  soundBtns.forEach(b => {
+    b.innerHTML = soundOn ? ICON_ON : ICON_OFF;
+    b.setAttribute('aria-pressed', String(soundOn));
+    b.setAttribute('aria-label', soundOn ? 'Sound on' : 'Sound off');
+  });
+}
+paintSound();
+soundBtns.forEach(b => b.addEventListener('click', () => { soundOn = !soundOn; paintSound(); if (soundOn){ audio(); pip(); } }));
+
+// ---------- state ----------
+let state = 'home';            // home | pick | play | won | dress
+let pendingGame = 'maze', currentGame = 'maze';   // which game the Moflin picker is for / which is open
+let S = 40;                    // pixels per tile
+let dragging = false, moved = false, pid = null, downT = 0, downPtr = {x:0, y:0};
+let ptr = {x:0, y:0}, off = {x:0, y:0}, rest = {x:0, y:0};
+let vx = 0, last = 0, glide = null, motion = null;   // motion = a jump or a chute ride in progress
+let hops = 0, hopping = false, hopIdx = 0;
+let idleTimer = 0, hintAnim = null, hintKind = '', nearT = 0, picked = false;
+const keys = {left:false, right:false, up:false, down:false};
+
+// ---------- pick screen ----------
+Object.keys(THEMES).forEach(k => {
+  const t = THEMES[k], b = document.createElement('button');
+  b.className = 'pick'; b.type = 'button'; b.dataset.theme = k;
+  b.setAttribute('aria-label', t.label);
+  b.innerHTML = `<span class="ground"></span><span class="bob">${moflinSVG(t, 'p-' + k)}</span>`;
+  choices.appendChild(b);
+});
+
+function layoutPick(){
+  const r = choices.getBoundingClientRect();
+  const row = window.innerWidth / window.innerHeight >= 1.25;
+  const size = row ? Math.min((r.width - 56) / 4, r.height * 0.85) : Math.min((r.width - 40) / 2, (r.height - 36) / 2);
+  choices.style.setProperty('--pick', Math.max(80, Math.floor(size)) + 'px');
+}
+
+const hopFrames = H => [
+  {transform:'translateY(0) scale(1,1)', offset:0, easing:'ease-out'},
+  {transform:'translateY(0) scale(1.14,.84)', offset:.15, easing:'ease-out'},
+  {transform:`translateY(${-H}px) scale(.93,1.09)`, offset:.5, easing:'ease-in'},
+  {transform:'translateY(0) scale(1.12,.88)', offset:.86, easing:'ease-out'},
+  {transform:'translateY(0) scale(1,1)', offset:1}
+];
+const shadowFrames = [
+  {transform:'scale(1)', opacity:1, offset:0},
+  {transform:'scale(.55)', opacity:.5, offset:.5},
+  {transform:'scale(1)', opacity:1, offset:1}
+];
+const SLIDE_FRAMES = [
+  {transform:'scale(1) rotate(0deg)', opacity:1, offset:0, easing:'ease-in'},
+  {transform:'scale(.22) rotate(240deg)', opacity:.6, offset:.2},
+  {transform:'scale(.42) rotate(720deg)', opacity:.55, offset:.72},
+  {transform:'scale(.42) rotate(900deg)', opacity:.6, offset:.88, easing:'ease-out'},
+  {transform:'scale(1.15) rotate(1000deg)', opacity:1, offset:.95},
+  {transform:'scale(1) rotate(1080deg)', opacity:1, offset:1}
+];
+
+const CLIMB_FRAMES = [
+  {transform:'scale(1) rotate(0deg)', offset:0},
+  {transform:'scale(.72) rotate(0deg)', offset:.12},
+  {transform:'scale(.72) rotate(-10deg)', offset:.3},
+  {transform:'scale(.72) rotate(10deg)', offset:.45},
+  {transform:'scale(.72) rotate(-10deg)', offset:.6},
+  {transform:'scale(.72) rotate(10deg)', offset:.75},
+  {transform:'scale(.72) rotate(0deg)', offset:.88, easing:'ease-out'},
+  {transform:'scale(1.18) rotate(0deg)', offset:.95},
+  {transform:'scale(1) rotate(0deg)', offset:1}
+];
+
+choices.addEventListener('click', e => {
+  const b = e.target.closest('.pick');
+  if (!b || picked) return;
+  picked = true;
+  audio(); chirp();
+  b.classList.add('happy');
+  b.querySelector('svg').animate(hopFrames(b.offsetHeight * 0.32), {duration:520});
+  setTimeout(() => { picked = false; b.classList.remove('happy'); chooseMoflin(b.dataset.theme); }, 580);
+});
+
+// ---------- home screen: pick a mini game ----------
+const svgArt = body => `<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${body}</svg>`;
+const moflinAt = (key, id, x, y, sc) => `<g transform="translate(${x} ${y}) scale(${sc})">${moflinInner(THEMES[key], id)}</g>`;
+const spark = (cx, cy, r, fill) => `<path d="M${cx} ${cy - r}Q${cx} ${cy} ${cx + r} ${cy}Q${cx} ${cy} ${cx} ${cy + r}Q${cx} ${cy} ${cx - r} ${cy}Q${cx} ${cy} ${cx} ${cy - r}Z" fill="${fill}"/>`;
+
+function artMaze(){
+  const walls = 'M70 24V96M70 96H112M112 60V136M112 60H150M150 100V176M70 136V176';
+  return svgArt(`
+<rect x="14" y="14" width="172" height="172" rx="28" fill="#EEF7E8"/>
+<g fill="none" stroke="#2E9C8C" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"><rect x="24" y="24" width="152" height="152" rx="22"/><path d="${walls}"/></g>
+<g fill="none" stroke="#EEF7E8" stroke-opacity=".8" stroke-width="2.5" stroke-dasharray="5 6" stroke-linecap="round"><rect x="24" y="24" width="152" height="152" rx="22"/><path d="${walls}"/></g>
+<g transform="translate(150 44)"><ellipse rx="17" ry="13" fill="#B98A57"/><ellipse rx="11" ry="8" fill="#6E4A28"/><ellipse rx="9" ry="6" fill="#FFE9D2"/><path d="M-12.5 0A12.5 9 0 0 0 12.5 0" fill="none" stroke="#B98A57" stroke-width="6" stroke-linecap="round"/></g>
+${moflinAt('gold', 'h-maze', 47, 146, .34)}`);
+}
+function artDress(){
+  return svgArt(`
+${spark(34, 52, 9, '#FFC83D')}${spark(168, 66, 11, '#fff')}${spark(160, 150, 8, '#FFC83D')}${spark(36, 138, 7, '#fff')}
+${moflinAt('pink', 'h-dress', 100, 120, 1.02)}
+<path d="M100 150L82 139Q78 152 82 163Z" fill="#F0625A"/><path d="M100 150L118 139Q122 152 118 163Z" fill="#F0625A"/><circle cx="100" cy="151" r="5.5" fill="#C8394B"/>
+<path d="M77 76L123 76L100 20Z" fill="#7B8CFF"/>
+<path d="M82.8 62L117.2 62L112.3 50L87.7 50Z" fill="#FFC83D"/>
+<path d="M91 42L109 42L105 32L95 32Z" fill="#F0625A"/>
+<circle cx="100" cy="17" r="7" fill="#FFC83D"/>`);
+}
+function artRaces(){
+  let flag = '';
+  for (let r = 0; r < 3; r++) for (let c = 0; c < 4; c++) flag += `<rect x="${134 + c * 9}" y="${30 + r * 9}" width="9" height="9" fill="${(r + c) % 2 ? '#fff' : '#33285A'}"/>`;
+  return svgArt(`
+<rect x="0" y="150" width="200" height="50" fill="#5B5F7A"/>
+<line x1="6" y1="178" x2="194" y2="178" stroke="#fff" stroke-width="5" stroke-dasharray="18 14" stroke-linecap="round"/>
+<line x1="170" y1="30" x2="170" y2="118" stroke="#33285A" stroke-width="4" stroke-linecap="round"/>${flag}
+<g stroke="#fff" stroke-width="5" stroke-linecap="round" opacity=".9"><line x1="8" y1="92" x2="30" y2="92"/><line x1="4" y1="110" x2="24" y2="110"/><line x1="10" y1="128" x2="30" y2="128"/></g>
+${moflinAt('gold', 'h-race', 100, 96, .82)}
+<path d="M34 130Q34 112 54 112L146 112Q166 112 166 130L166 152L34 152Z" fill="#F0625A"/>
+<rect x="44" y="122" width="112" height="9" rx="4.5" fill="#fff" opacity=".4"/>
+<circle cx="162" cy="126" r="5" fill="#FFE27A"/>
+<circle cx="66" cy="154" r="16" fill="#33285A"/><circle cx="66" cy="154" r="6" fill="#DDD"/>
+<circle cx="134" cy="154" r="16" fill="#33285A"/><circle cx="134" cy="154" r="6" fill="#DDD"/>`);
+}
+function artSpelling(){
+  const blk = (ch, x, y, fill, rot) => `<g transform="rotate(${rot} ${x + 31} ${y + 31})"><rect x="${x}" y="${y}" width="62" height="62" rx="12" fill="${fill}"/><rect x="${x + 4}" y="${y + 4}" width="54" height="54" rx="9" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="2"/><text x="${x + 31}" y="${y + 33}" text-anchor="middle" dominant-baseline="central" font-family="Fredoka,'Trebuchet MS',system-ui,sans-serif" font-weight="600" font-size="38" fill="#fff">${ch}</text></g>`;
+  return svgArt(`
+${spark(30, 40, 9, '#fff')}${spark(172, 58, 10, '#F0625A')}${spark(170, 122, 7, '#fff')}
+${blk('A', 24, 128, '#F0625A', -4)}${blk('B', 100, 130, '#3E9BF2', 4)}${blk('C', 62, 68, '#3DBFA6', -3)}
+${moflinAt('rainbow', 'h-spell', 96, 40, .52)}`);
+}
+
+const GAMES = [
+  {id:'maze',     label:'Moflin Maze',     tag:'Maze',     bg:'#BFE8D8', ready:true,  art:artMaze},
+  {id:'dressup',  label:'Moflin Dress Up', tag:'Dress Up', bg:'#F8C9E0', ready:true,  art:artDress},
+  {id:'races',    label:'Moflin Races',    tag:'Races',    bg:'#B9DCFB', ready:true,  art:artRaces},
+  {id:'spelling', label:'Moflin Spelling', tag:'Spelling', bg:'#FFE7A3', ready:true,  art:artSpelling}
+];
+const ZZZ_SVG = '<svg viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="19" fill="#fff" fill-opacity=".92"/><circle cx="18" cy="22" r="10" fill="#7B8CFF"/><circle cx="23" cy="18" r="9" fill="#fff"/><text x="27" y="15" font-family="Fredoka,sans-serif" font-weight="600" font-size="11" fill="#7B8CFF">z</text></svg>';
+
+GAMES.forEach(gm => {
+  const b = document.createElement('button');
+  b.className = 'tile' + (gm.ready ? '' : ' soon');
+  b.type = 'button'; b.dataset.game = gm.id;
+  b.style.setProperty('--tile-bg', gm.bg);
+  b.setAttribute('aria-label', gm.ready ? gm.label : gm.label + ', coming soon');
+  b.innerHTML = `<span class="art">${gm.art()}</span><span class="tag">${gm.tag}</span>` + (gm.ready ? '' : `<span class="zzz">${ZZZ_SVG}</span>`);
+  tiles.appendChild(b);
+});
+
+function layoutHome(){
+  const r = tiles.getBoundingClientRect();
+  const row = window.innerWidth / window.innerHeight >= 1.25, gap = 14;
+  const size = row ? Math.min((r.width - 32 - gap * 3) / 4, r.height - 32)
+                   : Math.min((r.width - 32 - gap) / 2, (r.height - 32 - gap) / 2);
+  tiles.style.setProperty('--tile', Math.max(90, Math.floor(size)) + 'px');
+}
+
+let tileBusy = false;
+tiles.addEventListener('click', e => {
+  const b = e.target.closest('.tile');
+  if (!b || tileBusy) return;
+  audio();
+  const gm = GAMES.find(x => x.id === b.dataset.game);
+  if (gm.ready){
+    tileBusy = true; chirp();
+    b.animate([{transform:'scale(1)'}, {transform:'scale(.93)'}, {transform:'scale(1)'}], {duration:280});
+    setTimeout(() => { tileBusy = false; openGame(gm.id); }, 300);
+  } else {
+    sleepyNudge(b, gm);
+  }
+});
+function openGame(id){
+  if (id === 'maze' || id === 'dressup' || id === 'races' || id === 'spelling') goPick(id);
+}
+// a game that is not built yet: the tile gives a sleepy wobble and a few floating z's
+function sleepyNudge(b, gm){
+  tone(330, 220, .28, {gain:.08});
+  b.animate([
+    {transform:'rotate(0deg)'}, {transform:'rotate(-3deg)'}, {transform:'rotate(3deg)'},
+    {transform:'rotate(-2deg)'}, {transform:'rotate(0deg)'}
+  ], {duration:460});
+  const r = b.getBoundingClientRect();
+  for (let i = 0; i < 3; i++){
+    const el = document.createElement('span');
+    el.className = 'zz'; el.textContent = 'z';
+    el.style.cssText = `left:${r.right - r.width * .22 + i * 8}px;top:${r.top + r.height * .16}px;font-size:${16 + i * 6}px`;
+    fx.appendChild(el);
+    const a = el.animate([
+      {transform:'translate(0,0)', opacity:0},
+      {transform:`translate(${8 + i * 8}px,${-20 - i * 14}px)`, opacity:1, offset:.35},
+      {transform:`translate(${14 + i * 12}px,${-50 - i * 20}px)`, opacity:0}
+    ], {duration:1400, delay:i * 180, easing:'ease-out', fill:'backwards'});
+    a.onfinish = () => el.remove();
+  }
+  sr.textContent = gm.label + ' is still asleep and will wake up soon.';
+}
+
+// ---------- drawing the maze ----------
+const HEART_D = 'M16 29C3 19-2 9 5 3C10-1 15 2 16 6C17 2 22-1 27 3C34 9 29 19 16 29Z';
+
+function mixHex(a, b, t){
+  const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16);
+  const ch = sh => Math.round(((pa >> sh) & 255) * (1 - t) + ((pb >> sh) & 255) * t);
+  return '#' + ((1 << 24) + (ch(16) << 16) + (ch(8) << 8) + ch(0)).toString(16).slice(1);
+}
+
+function renderMaze(){
+  let d = '';
+  for (const s of segs){
+    const x2 = (s[2] === s[0] && s[3] === s[1]) ? s[2] + 0.001 : s[2];
+    d += `M${s[0]} ${s[1]}L${x2} ${s[3]}`;
+  }
+
+  // wooden ladders with lime up-arrows and a ladder badge at the foot
+  let lad = '';
+  for (const l of ladders){
+    const dx = l.tx - l.bx, dy = l.ty - l.by, len = Math.hypot(dx, dy), ux = dx / len, uy = dy / len;
+    const ang = f2(Math.atan2(dy, dx) * 180 / Math.PI);
+    let rungs = '', arrows = '';
+    for (let k = 0.35; k < len - 0.2; k += 0.38){
+      rungs += `<line x1="${f2(k)}" y1="-.17" x2="${f2(k)}" y2=".17" stroke="#7A4B22" stroke-width=".1"/><line x1="${f2(k)}" y1="-.17" x2="${f2(k)}" y2=".17" stroke="#D9A066" stroke-width=".05"/>`;
+    }
+    for (let k = 1.9; k < len - 0.9; k += 2.2){
+      arrows += `<g transform="translate(${f2(k)} 0)"><circle r=".2" fill="#6CC644" stroke="#2F7A1F" stroke-width=".05"/><path d="M-.07 -.09L.08 0L-.07 .09" fill="none" stroke="#fff" stroke-width=".065" stroke-linecap="round" stroke-linejoin="round"/></g>`;
+    }
+    const body = `<line x1="0" y1="-.17" x2="${f2(len)}" y2="-.17" stroke="#7A4B22" stroke-width=".13" stroke-linecap="round"/><line x1="0" y1=".17" x2="${f2(len)}" y2=".17" stroke="#7A4B22" stroke-width=".13" stroke-linecap="round"/>` +
+      `<line x1="0" y1="-.17" x2="${f2(len)}" y2="-.17" stroke="#D9A066" stroke-width=".07" stroke-linecap="round"/><line x1="0" y1=".17" x2="${f2(len)}" y2=".17" stroke="#D9A066" stroke-width=".07" stroke-linecap="round"/>` + rungs;
+    lad += `
+<g transform="translate(.05 .09)" opacity=".2"><g transform="translate(${l.bx} ${l.by}) rotate(${ang})" stroke="#33285A"><line x1="0" y1="-.17" x2="${f2(len)}" y2="-.17" stroke-width=".13" stroke-linecap="round"/><line x1="0" y1=".17" x2="${f2(len)}" y2=".17" stroke-width=".13" stroke-linecap="round"/></g></g>
+<g transform="translate(${l.bx} ${l.by}) rotate(${ang})">${body}${arrows}</g>
+<g transform="translate(${l.tx} ${l.ty})">
+  <circle r=".56" fill="#6CC644" opacity=".25"/>
+  <circle r=".5" fill="none" stroke="#6CC644" stroke-width=".07" stroke-dasharray=".12 .1"/>
+</g>
+<g transform="translate(${l.bx} ${l.by})">
+  <circle r=".6" fill="#33285A" opacity=".2" transform="translate(.05 .08)"/>
+  <circle r=".56" fill="#2F7A1F"/>
+  <circle r=".5" fill="#6CC644"/>
+  <circle r=".5" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width=".05" stroke-dasharray=".1 .1"/>
+  <g transform="rotate(${ang})" stroke="#fff" stroke-linecap="round" fill="none">
+    <line x1="-.24" y1="-.12" x2=".2" y2="-.12" stroke-width=".07"/><line x1="-.24" y1=".12" x2=".2" y2=".12" stroke-width=".07"/>
+    <line x1="-.14" y1="-.12" x2="-.14" y2=".12" stroke-width=".055"/><line x1="-.02" y1="-.12" x2="-.02" y2=".12" stroke-width=".055"/><line x1=".1" y1="-.12" x2=".1" y2=".12" stroke-width=".055"/>
+    <path d="M.24 -.08L.33 0L.24 .08" stroke-width=".065" stroke-linejoin="round"/>
+  </g>
+</g>`;
+  }
+
+  // twisty tube slides: striped tube, arrows showing the way down, a swirling funnel and an open exit
+  let tubes = '';
+  for (const c of chutes){
+    const pts = chuteCurve(c);
+    const path = 'M' + pts.map(p => f2(p[0]) + ' ' + f2(p[1])).join('L');
+    const dark = mixHex(c.color, '#1E1633', .4), light = mixHex(c.color, '#FFFFFF', .5);
+    const n = Math.max(2, Math.floor(pathLen(pts) / 1.7));
+    let arrows = '';
+    for (let i = 1; i <= n; i++){
+      const u = i / (n + 1), p = pathAt(pts, u), q = pathAt(pts, Math.min(1, u + 0.015));
+      const ang = Math.atan2(q[1] - p[1], q[0] - p[0]) * 180 / Math.PI;
+      arrows += `<path d="M-.06 -.08L.07 0L-.06 .08" transform="translate(${f2(p[0])} ${f2(p[1])}) rotate(${f2(ang)})" fill="none" stroke="#fff" stroke-width=".06" stroke-linecap="round" stroke-linejoin="round"/>`;
+    }
+    let sp = '';
+    for (let a = 0; a <= 4 * Math.PI; a += 0.3){
+      const r = a / (4 * Math.PI) * 0.29;
+      sp += (sp ? 'L' : 'M') + f2(Math.cos(a) * r) + ' ' + f2(Math.sin(a) * r);
+    }
+    tubes += `
+<g fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path d="${path}" stroke="#33285A" stroke-opacity=".22" stroke-width=".5" transform="translate(.05 .09)"/>
+  <path d="${path}" stroke="${dark}" stroke-width=".46"/>
+  <path d="${path}" stroke="${c.color}" stroke-width=".36"/>
+  <path d="${path}" stroke="#fff" stroke-opacity=".35" stroke-width=".08" transform="translate(-.05 -.06)"/>
+  <path class="tube-flow" d="${path}" stroke="${light}" stroke-opacity=".9" stroke-width=".36" stroke-linecap="butt" stroke-dasharray=".09 .26"/>
+</g>
+${arrows}
+<g transform="translate(${c.tx} ${c.ty})">
+  <circle r=".56" fill="${c.color}" opacity=".22"/>
+  <circle r=".5" fill="none" stroke="${c.color}" stroke-width=".07" stroke-dasharray=".12 .1"/>
+  <circle r=".3" fill="${dark}"/>
+  <circle r=".2" fill="${light}"/>
+</g>
+<g transform="translate(${c.hx} ${c.hy})">
+  <circle r=".6" fill="#33285A" opacity=".2" transform="translate(.05 .08)"/>
+  <circle r=".56" fill="${dark}"/>
+  <circle r=".5" fill="${c.color}"/>
+  <circle r=".5" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width=".05" stroke-dasharray=".1 .1"/>
+  <circle r=".36" fill="#2A2036"/>
+  <g class="swirl"><circle r=".3" fill="none"/><path d="${sp}" fill="none" stroke="#fff" stroke-opacity=".75" stroke-width=".05" stroke-linecap="round" stroke-linejoin="round"/></g>
+</g>`;
+  }
+
+  let hv = '';
+  for (const h of hurdles){
+    const [x1, y1, x2, y2] = h.axis === 'x' ? [0, -.55, 0, .55] : [-.55, 0, .55, 0];
+    hv += `
+<g transform="translate(${h.cx} ${h.cy})">
+  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#33285A" stroke-width=".2" stroke-linecap="round" opacity=".25" transform="translate(.05 .07)"/>
+  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#F0625A" stroke-width=".2" stroke-linecap="round"/>
+  <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width=".2" stroke-dasharray=".11 .11"/>
+  <circle cx="${x1}" cy="${y1}" r=".13" fill="#5B3A63"/>
+  <circle cx="${x2}" cy="${y2}" r=".13" fill="#5B3A63"/>
+</g>`;
+  }
+
+  // the Moflin nest: a woven bowl with a fluffy lining; its front rim is drawn over the Moflin
+  const TW_D = '#8A5F32', TW_M = '#B98A57', TW_L = '#E0BC86';
+  let weave = '', weaveFront = '';
+  for (let i = 0; i < 28; i++){
+    const a = i / 28 * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
+    weave += `<line x1="${f2(ca * .36)}" y1="${f2(sa * .3)}" x2="${f2(ca * .56)}" y2="${f2(sa * .48)}" stroke="${i % 2 ? TW_L : TW_D}" stroke-width=".045" stroke-linecap="round"/>`;
+  }
+  for (let a = 0.12; a < Math.PI; a += 0.24){
+    const ca = Math.cos(a), sa = Math.sin(a), k = Math.round(a / 0.24) % 2;
+    weaveFront += `<line x1="${f2(ca * .37)}" y1="${f2(sa * .29)}" x2="${f2(ca * .56)}" y2="${f2(sa * .48)}" stroke="${k ? TW_L : TW_D}" stroke-width=".045" stroke-linecap="round"/>`;
+  }
+  const nestBack = `
+<g transform="translate(${goal.x} ${goal.y + 0.04})">
+  <circle class="goal-glow" r=".7"/>
+  <ellipse cx=".03" cy=".1" rx=".58" ry=".5" fill="#33285A" opacity=".2"/>
+  <ellipse rx=".56" ry=".48" fill="${TW_M}"/>
+  ${weave}
+  <ellipse rx=".56" ry=".48" fill="none" stroke="${TW_D}" stroke-width=".035"/>
+  <ellipse rx=".38" ry=".3" fill="#6E4A28"/>
+  <path d="${furPath(36, 28, 13, .09, 7)}" transform="translate(0 -.01) scale(.01)" fill="#FFE9D2"/>
+  <path d="${furPath(22, 16, 9, .1, 9)}" transform="translate(-.02 -.03) scale(.01)" fill="#FFF7EC"/>
+</g>`;
+  nestFront.setAttribute('viewBox', `0 0 ${COLS} ${ROWS}`);
+  nestFront.innerHTML = `
+<g transform="translate(${goal.x} ${goal.y + 0.04})">
+  <path d="M-.46 0A.46 .38 0 0 0 .46 0" fill="none" stroke="${TW_D}" stroke-width=".22" stroke-linecap="round"/>
+  <path d="M-.46 0A.46 .38 0 0 0 .46 0" fill="none" stroke="${TW_M}" stroke-width=".17" stroke-linecap="round"/>
+  ${weaveFront}
+</g>`;
+
+  mazeSvg.setAttribute('viewBox', `0 0 ${COLS} ${ROWS}`);
+  mazeSvg.innerHTML = `
+<g fill="none" stroke-linejoin="round" stroke-linecap="round">
+  <path class="w-shadow" d="${d}" transform="translate(0 .09)" stroke-width="${WALL_W}"/>
+  <path class="w-main" d="${d}" stroke-width="${WALL_W}"/>
+  <path class="w-light" d="${d}" transform="translate(-.03 -.06)" stroke-width="${WALL_W * .5}"/>
+  <path class="w-stitch" d="${d}" stroke-width=".045" stroke-linecap="butt" stroke-dasharray=".11 .13"/>
+</g>${lad}${tubes}${nestBack}${hv}`;
+}
+
+// ---------- layout ----------
+function stageSize(){
+  const cs = getComputedStyle(stage);
+  return {
+    aw: stage.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+    ah: stage.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom)
+  };
+}
+function chooseDims(aw, ah){
+  const w = clamp(Math.floor((aw / 40 - 1) / 2), 3, 7);
+  const s0 = Math.min(aw / (2 * w + 1), 60);
+  const h = clamp(Math.floor((ah / s0 - 1) / 2), 3, 8);
+  return {w, h};
+}
+function applySize(){
+  if (!g) return;
+  const {aw, ah} = stageSize();
+  S = Math.max(16, Math.floor(Math.min(aw / COLS, ah / ROWS, 64)));
+  board.style.setProperty('--S', S + 'px');
+  board.style.width = COLS * S + 'px';
+  board.style.height = ROWS * S + 'px';
+  place();
+}
+function place(){
+  const box = S * 2.4;
+  moflinEl.style.transform = `translate3d(${pos.x * S - box / 2}px,${pos.y * S - box / 2}px,0)`;
+}
+function toTile(e){
+  const r = board.getBoundingClientRect();
+  return {x: (e.clientX - r.left) / S, y: (e.clientY - r.top) / S};
+}
+
+// ---------- hints ----------
+const HAND_TIP = 0.083;
+function stopHint(){
+  clearTimeout(idleTimer);
+  if (hintAnim){ hintAnim.cancel(); hintAnim = null; }
+  hintKind = '';
+}
+function nextDir(){
+  const tx = Math.floor(pos.x), ty = Math.floor(pos.y);
+  let best = null, bd = Infinity;
+  for (const [dx, dy] of DIRS){
+    const nx = tx + dx, ny = ty + dy;
+    if (g[ny] && g[ny][nx] === 0 && distGoal[ny][nx] >= 0 && distGoal[ny][nx] < bd){ bd = distGoal[ny][nx]; best = [dx, dy]; }
+  }
+  return best;
+}
+function showDragHint(){
+  stopHint();
+  if (state !== 'play' || dragging || motion) return;
+  const dir = nextDir(); if (!dir) return;
+  const W = S * 1.6, bx = pos.x * S - W / 2, by = (pos.y + 0.3) * S - W * HAND_TIP;
+  const dx = dir[0] * 1.7 * S, dy = dir[1] * 1.7 * S;
+  hintKind = 'drag';
+  hintAnim = hand.animate([
+    {transform:`translate(${bx}px,${by}px) scale(1)`, opacity:0, offset:0, easing:'ease-out'},
+    {transform:`translate(${bx}px,${by}px) scale(.92)`, opacity:1, offset:.15, easing:'ease-in-out'},
+    {transform:`translate(${bx + dx}px,${by + dy}px) scale(.92)`, opacity:1, offset:.75, easing:'ease-out'},
+    {transform:`translate(${bx + dx}px,${by + dy}px) scale(1)`, opacity:0, offset:1}
+  ], {duration:1900, iterations:Infinity});
+}
+// a tapping hand: shown after winning, or when the Moflin is stuck at a hurdle
+function showTapHint(){
+  stopHint();
+  if (!(state === 'won' || (state === 'play' && !motion && hurdleAhead()))) return;
+  const W = S * 1.6, bx = pos.x * S - W / 2, by = (pos.y + 0.35) * S - W * HAND_TIP;
+  hintKind = 'tap';
+  hintAnim = hand.animate([
+    {transform:`translate(${bx}px,${by + S * .5}px) scale(1)`, opacity:0, offset:0},
+    {transform:`translate(${bx}px,${by + S * .1}px) scale(1)`, opacity:1, offset:.3},
+    {transform:`translate(${bx}px,${by - S * .02}px) scale(.9)`, opacity:1, offset:.45},
+    {transform:`translate(${bx}px,${by + S * .1}px) scale(1)`, opacity:1, offset:.6},
+    {transform:`translate(${bx}px,${by + S * .5}px) scale(1)`, opacity:0, offset:1}
+  ], {duration:1700, iterations:Infinity});
+}
+function idleHint(){
+  if (state !== 'play' || dragging || motion) return;
+  if (hurdleAhead()) showTapHint(); else showDragHint();
+}
+function scheduleIdle(ms){
+  clearTimeout(idleTimer);
+  idleTimer = setTimeout(idleHint, ms);
+}
+
+// ---------- particles ----------
+const CONF = ['#F0625A', '#FFC83D', '#3DBFA6', '#7B8CFF', '#FF8FB8', '#FFFFFF'];
+const HEARTS = ['#F0625A', '#FF8FB8', '#FFC83D'];
+
+function burst(n, box){
+  const r = box || jumperEl.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  if (reduceMotion()) n = Math.round(n / 3);
+  for (let i = 0; i < n; i++){
+    const el = document.createElement('i'), size = 6 + Math.random() * 8;
+    el.className = 'conf';
+    el.style.cssText = `width:${size}px;height:${size * (Math.random() < .5 ? 1 : .55)}px;background:${CONF[i % CONF.length]};left:${cx}px;top:${cy}px;border-radius:${Math.random() < .5 ? '50%' : '2px'}`;
+    fx.appendChild(el);
+    const ang = -Math.PI / 2 + (Math.random() - .5) * Math.PI * 1.3, sp = 120 + Math.random() * 260;
+    const dx = Math.cos(ang) * sp, dy = Math.sin(ang) * sp;
+    const fall = window.innerHeight * .6 + Math.random() * 200, rot = (Math.random() - .5) * 720;
+    const a = el.animate([
+      {transform:'translate(0,0) rotate(0deg)', opacity:1},
+      {transform:`translate(${dx * .7}px,${dy * .7}px) rotate(${rot * .4}deg)`, opacity:1, offset:.35},
+      {transform:`translate(${dx}px,${dy + fall}px) rotate(${rot}deg)`, opacity:0}
+    ], {duration:1500 + Math.random() * 1100, easing:'cubic-bezier(.2,.7,.4,1)'});
+    a.onfinish = () => el.remove();
+  }
+}
+function floatHearts(n, box){
+  const r = box || jumperEl.getBoundingClientRect();
+  for (let i = 0; i < n; i++){
+    const el = document.createElement('span'), sz = 16 + Math.random() * 14;
+    el.className = 'fh';
+    el.style.cssText = `left:${r.left + r.width / 2 + (Math.random() - .5) * r.width * .7}px;top:${r.top + r.height * .1}px;width:${sz}px;height:${sz}px`;
+    el.innerHTML = `<svg viewBox="0 0 32 30"><path d="${HEART_D}" fill="${HEARTS[Math.floor(Math.random() * HEARTS.length)]}"/></svg>`;
+    fx.appendChild(el);
+    const rise = 60 + Math.random() * 60, drift = (Math.random() - .5) * 50;
+    const a = el.animate([
+      {transform:'translate(-50%,0) scale(.4)', opacity:0},
+      {transform:`translate(calc(-50% + ${drift * .5}px),${-rise * .5}px) scale(1)`, opacity:1, offset:.3},
+      {transform:`translate(calc(-50% + ${drift}px),${-rise}px) scale(.9)`, opacity:0}
+    ], {duration:1100 + Math.random() * 400, easing:'ease-out'});
+    a.onfinish = () => el.remove();
+  }
+}
+
+// ---------- victory jumping (tap the Moflin after finishing) ----------
+function hop(){
+  hopping = true;
+  const H = S * 1.15, dur = 520;
+  const a = jumperEl.animate(hopFrames(H), {duration:dur});
+  shadowEl.animate(shadowFrames, {duration:dur});
+  squeak(1 + (hopIdx++ % 3) * 0.12);
+  setTimeout(() => { if (hopping) floatHearts(2); }, dur * .35);
+  a.onfinish = () => { hops--; if (hops > 0 && state === 'won') hop(); else { hops = 0; hopping = false; } };
+  a.oncancel = () => { hopping = false; };
+}
+function queueHops(n){
+  hops = Math.min(hops + n, 12);
+  if (!hopping) hop();
+}
+function tapMoflin(){
+  stopHint();
+  moflinEl.classList.remove('invite');
+  queueHops(3);
+}
+
+// ---------- jumping hurdles and riding chutes ----------
+function smallHop(){
+  jumperEl.animate(hopFrames(S * .55), {duration:420});
+  shadowEl.animate(shadowFrames, {duration:420});
+  squeak(1);
+}
+function startJump(h){
+  const to = jumpLanding(h);
+  stopHint();
+  motion = {type:'jump', from:{x:pos.x, y:pos.y}, to, t0:performance.now(), dur:640};
+  jumperEl.animate(hopFrames(S * 1.5), {duration:640});
+  shadowEl.animate(shadowFrames, {duration:640});
+  squeak(1.25);
+  setTimeout(() => floatHearts(2), 260);
+}
+function startSlide(c){
+  stopHint();
+  dragging = false; moflinEl.classList.remove('held');
+  motion = {type:'slide', cv:chuteCurve(c), t0:performance.now(), dur:1500};
+  jumperEl.classList.add('sliding');
+  jumperEl.animate(SLIDE_FRAMES, {duration:1500});
+  shadowEl.animate([
+    {opacity:1, offset:0}, {opacity:0, offset:.15}, {opacity:0, offset:.85}, {opacity:1, offset:1}
+  ], {duration:1500});
+  whee();
+}
+function startClimb(l){
+  stopHint();
+  dragging = false; moflinEl.classList.remove('held');
+  const len = Math.hypot(l.tx - l.bx, l.ty - l.by), dur = clamp(900 + len * 90, 1200, 2000);
+  motion = {type:'climb', cv:[[l.bx, l.by], [l.tx, l.ty]], t0:performance.now(), dur};
+  jumperEl.animate(CLIMB_FRAMES, {duration:dur});
+  climbSound();
+}
+const easeIO = q => q < .5 ? 2 * q * q : 1 - Math.pow(-2 * q + 2, 2) / 2;
+function runMotion(t){
+  const m = motion, p = clamp((t - m.t0) / m.dur, 0, 1);
+  if (m.type === 'jump'){
+    const e = easeIO(p);
+    pos.x = m.from.x + (m.to.x - m.from.x) * e;
+    pos.y = m.from.y + (m.to.y - m.from.y) * e;
+  } else {
+    const u = m.type === 'climb' ? (p < .12 ? 0 : p < .88 ? easeIO((p - .12) / .76) : 1)
+                                 : (p < .2 ? 0 : p < .88 ? easeIO((p - .2) / .68) : 1);
+    const b = pathAt(m.cv, u);
+    pos.x = b[0]; pos.y = b[1];
+  }
+  if (p >= 1) finishMotion();
+}
+function finishMotion(){
+  const m = motion;
+  motion = null;
+  if (m.type === 'jump'){ resolve(); }
+  else { jumperEl.classList.remove('sliding'); floatHearts(3); squeak(m.type === 'climb' ? 1.5 : 1.3); }
+  nearT = performance.now();
+  scheduleIdle(m.type === 'slide' ? 3500 : 4500);
+}
+function tapInPlay(){
+  if (motion) return;
+  const h = nearHurdle();
+  if (h) startJump(h); else smallHop();
+  scheduleIdle(4500);
+}
+
+// ---------- dress up ----------
+const dress = $('#dress'), dstage = $('#dstage'), dwrap = $('#dwrap'), dm = $('#dm'), dshadow = $('#dshadow');
+const tabsEl = $('#tabs'), itemsEl = $('#items'), cameraBtn = $('#cameraBtn'), clearBtn = $('#clearBtn');
+const dMoflinBtn = $('#dMoflinBtn'), dSoundBtn = $('#dSoundBtn'), flashEl = $('#flash'), dhand = $('#dhand');
+dhand.innerHTML = hand.innerHTML.replace(/handShapes/g, 'handShapes2');
+
+const starPts = (cx, cy, ro, ri) => {
+  let p = '';
+  for (let i = 0; i < 10; i++){
+    const a = -Math.PI / 2 + i * Math.PI / 5, r = i % 2 ? ri : ro;
+    p += `${f2(cx + Math.cos(a) * r)},${f2(cy + Math.sin(a) * r)} `;
+  }
+  return p.trim();
+};
+const heartAt = (cx, cy, sc, fill, stroke) =>
+  `<path d="${HEART_D}" transform="translate(${f2(cx - 16 * sc)} ${f2(cy - 14.5 * sc)}) scale(${sc})" fill="${fill}" stroke="${stroke}" stroke-width="${f2(2 / sc)}" stroke-linejoin="round"/>`;
+const mirror = g => `<g transform="scale(-1 1)">${g}</g>`;
+const flower = (x, y, petal, mid) => {
+  let s = '';
+  for (let k = 0; k < 5; k++){
+    const a = k * Math.PI * 2 / 5 - Math.PI / 2;
+    s += `<circle cx="${f2(x + Math.cos(a) * 4.6)}" cy="${f2(y + Math.sin(a) * 4.6)}" r="3.6" fill="${petal}" stroke="#00000022" stroke-width=".6"/>`;
+  }
+  return s + `<circle cx="${x}" cy="${y}" r="2.8" fill="${mid}"/>`;
+};
+
+// where each kind of thing sits on the Moflin (Moflin drawing units)
+const SLOTS = {hat:[0, -40], face:[0, -6], wings:[0, 0], tail:[28, 30]};
+const BACK_SLOTS = ['wings', 'tail'];
+const HITS = {hat:[0, -20, 30], face:[0, 0, 24]};   // generous invisible grab areas
+
+const ITEMS = [
+  // --- hats and crowns ---
+  {id:'party', slot:'hat', cat:'head', name:'Party hat', vb:'-30 -66 60 76', draw:() =>
+    `<path d="M-22 4L22 4L0 -52Z" fill="#7B8CFF"/><path d="M-16.5 -10L16.5 -10L11.8 -22L-11.8 -22Z" fill="#FFC83D"/><path d="M-7 -34L7 -34L3.1 -44L-3.1 -44Z" fill="#F0625A"/><circle cx="0" cy="-55" r="6" fill="#FFC83D"/>`},
+  {id:'crown', slot:'hat', cat:'head', name:'Crown', vb:'-32 -36 64 50', draw:() =>
+    `<path d="M-24 6L-24 -18L-12 -6L0 -26L12 -6L24 -18L24 6Z" fill="#FFC83D" stroke="#C98F1B" stroke-width="2" stroke-linejoin="round"/><rect x="-24" y="-2" width="48" height="8" fill="#F6B21A" stroke="#C98F1B" stroke-width="2" stroke-linejoin="round"/><circle cx="-24" cy="-19" r="4" fill="#F0625A"/><circle cx="0" cy="-27" r="4.5" fill="#3E9BF2"/><circle cx="24" cy="-19" r="4" fill="#3DBFA6"/><circle cx="-12" cy="2" r="2.4" fill="#fff"/><circle cx="0" cy="2" r="2.4" fill="#fff"/><circle cx="12" cy="2" r="2.4" fill="#fff"/>`},
+  {id:'tophat', slot:'hat', cat:'head', name:'Top hat', vb:'-34 -48 68 60', draw:() =>
+    `<ellipse cx="0" cy="2" rx="30" ry="7" fill="#33285A"/><path d="M-19 2L-19 -36Q-19 -42 -13 -42L13 -42Q19 -42 19 -36L19 2Z" fill="#33285A"/><rect x="-19" y="-10" width="38" height="9" fill="#F0625A"/><rect x="-14" y="-38" width="5" height="26" rx="2" fill="#fff" opacity=".14"/>`},
+  {id:'wizard', slot:'hat', cat:'head', name:'Wizard hat', vb:'-36 -66 72 76', draw:() =>
+    `<ellipse cx="0" cy="3" rx="30" ry="7" fill="#5B3FB0"/><path d="M-19 2C-14 -22 -8 -38 0 -50C8 -60 20 -58 26 -50C14 -50 12 -38 19 2Z" fill="#7B5FE0"/><rect x="-18" y="-5" width="36" height="6" fill="#FFC83D" opacity=".9"/>${spark(-3, -20, 5, '#FFC83D')}${spark(8, -30, 3.5, '#fff')}${spark(-9, -34, 3.5, '#fff')}`},
+  {id:'flowers', slot:'hat', cat:'head', name:'Flower crown', vb:'-34 -22 68 36', draw:() =>
+    `<path d="M-26 1Q0 -13 26 1" fill="none" stroke="#4CAF50" stroke-width="5" stroke-linecap="round"/>${flower(-20.8, -1.5, '#FF8FB8', '#FFE27A')}${flower(-10.4, -4.9, '#fff', '#F0625A')}${flower(0, -6, '#FFC83D', '#F0625A')}${flower(10.4, -4.9, '#B39CFF', '#FFE27A')}${flower(20.8, -1.5, '#FF8FB8', '#FFE27A')}`},
+  {id:'cowboy', slot:'hat', cat:'head', name:'Cowboy hat', vb:'-40 -44 80 60', draw:() =>
+    `<path d="M-38 3Q-33 -7 -21 -4L21 -4Q33 -7 38 3Q0 14 -38 3Z" fill="#B9773D"/><path d="M-17 -3L-15 -30Q0 -38 15 -30L17 -3Z" fill="#C98B4E"/><path d="M-9 -33Q0 -27 9 -33" fill="none" stroke="#8A5A2B" stroke-width="2" stroke-linecap="round"/><rect x="-17" y="-12" width="34" height="7" fill="#7A4B22"/>`},
+  // --- glasses and masks ---
+  {id:'round', slot:'face', cat:'face', name:'Round glasses', vb:'-38 -16 76 32', draw:() =>
+    `<g fill="#7CC6F7" fill-opacity=".3" stroke="#33285A" stroke-width="3"><circle cx="-15" cy="0" r="10.5"/><circle cx="15" cy="0" r="10.5"/></g><path d="M-4.5 -1Q0 -4 4.5 -1M-25 -2L-33 -5M25 -2L33 -5" fill="none" stroke="#33285A" stroke-width="3" stroke-linecap="round"/><path d="M-21 -5Q-18 -8 -14 -7M9 -5Q12 -8 16 -7" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2" stroke-linecap="round"/>`},
+  {id:'starglasses', slot:'face', cat:'face', name:'Star glasses', vb:'-38 -16 76 32', draw:() =>
+    `<polygon points="${starPts(-15, 0, 13.5, 6.2)}" fill="#FFE27A" fill-opacity=".85" stroke="#C98F1B" stroke-width="2.4" stroke-linejoin="round"/><polygon points="${starPts(15, 0, 13.5, 6.2)}" fill="#FFE27A" fill-opacity=".85" stroke="#C98F1B" stroke-width="2.4" stroke-linejoin="round"/><path d="M-3 -2Q0 -4 3 -2M-27 -3L-34 -5M27 -3L34 -5" fill="none" stroke="#C98F1B" stroke-width="2.6" stroke-linecap="round"/>`},
+  {id:'heartglasses', slot:'face', cat:'face', name:'Heart glasses', vb:'-38 -16 76 32', draw:() =>
+    `${heartAt(-15, 0, .78, '#FF8FB8', '#D6789B')}${heartAt(15, 0, .78, '#FF8FB8', '#D6789B')}<path d="M-3 -3Q0 -5 3 -3M-27 -4L-34 -6M27 -4L34 -6" fill="none" stroke="#D6789B" stroke-width="2.6" stroke-linecap="round"/>`},
+  {id:'sunglasses', slot:'face', cat:'face', name:'Sunglasses', vb:'-38 -16 76 32', draw:() =>
+    `<rect x="-26" y="-7.5" width="22" height="15" rx="6.5" fill="#2A2036"/><rect x="4" y="-7.5" width="22" height="15" rx="6.5" fill="#2A2036"/><path d="M-4 -3Q0 -6 4 -3M-26 -3L-34 -5M26 -3L34 -5" fill="none" stroke="#2A2036" stroke-width="3" stroke-linecap="round"/><path d="M-22 -3L-15 -3M8 -3L15 -3" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>`},
+  {id:'hero', slot:'face', cat:'face', name:'Superhero mask', vb:'-38 -22 76 40', draw:() =>
+    `<path fill-rule="evenodd" fill="#F0625A" stroke="#B3342B" stroke-width="2" stroke-linejoin="round" d="M-31 -9Q-16 -18 0 -9Q16 -18 31 -9Q34 7 19 9Q9 9 0 3Q-9 9 -19 9Q-34 7 -31 -9Z M-24 0a9 7.5 0 1 0 18 0a9 7.5 0 1 0 -18 0Z M6 0a9 7.5 0 1 0 18 0a9 7.5 0 1 0 -18 0Z"/>`},
+  {id:'catface', slot:'face', cat:'face', name:'Cat nose and whiskers', vb:'-56 0 112 32', draw:() =>
+    `<path d="M-5 8L5 8L0 14Z" fill="#FF7FA5" stroke="#D6486E" stroke-width="1.5" stroke-linejoin="round"/><path d="M0 14Q-4 19 -9 16M0 14Q4 19 9 16" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/><path d="M-22 9L-50 3M-22 13L-52 14M-22 17L-50 25M22 9L50 3M22 13L52 14M22 17L50 25" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`},
+  // --- wings and tails ---
+  {id:'fairy', slot:'wings', cat:'back', name:'Fairy wings', vb:'-88 -44 176 76', draw:() => {
+    const h = `<ellipse cx="-56" cy="-16" rx="27" ry="13" transform="rotate(-35 -56 -16)" fill="#B39CFF" fill-opacity=".7" stroke="#fff" stroke-width="2"/><ellipse cx="-50" cy="12" rx="19" ry="9" transform="rotate(28 -50 12)" fill="#7CC6F7" fill-opacity=".7" stroke="#fff" stroke-width="2"/>`;
+    return h + mirror(h); }},
+  {id:'butterfly', slot:'wings', cat:'back', name:'Butterfly wings', vb:'-90 -56 180 108', draw:() => {
+    const h = `<path d="M-30 -8C-58 -52 -86 -26 -72 -2C-64 12 -44 8 -30 2Z" fill="#FF8FB8" stroke="#8B4B8F" stroke-width="2" stroke-linejoin="round"/><path d="M-30 4C-58 6 -74 26 -62 40C-50 50 -34 28 -30 10Z" fill="#FFB067" stroke="#8B4B8F" stroke-width="2" stroke-linejoin="round"/><circle cx="-60" cy="-14" r="6" fill="#fff" opacity=".8"/><circle cx="-52" cy="26" r="4.5" fill="#fff" opacity=".8"/>`;
+    return h + mirror(h); }},
+  {id:'angel', slot:'wings', cat:'back', name:'Angel wings', vb:'-90 -40 180 64', draw:() => {
+    const h = `<path d="M-30 -6C-48 -34 -80 -36 -86 -12C-72 -16 -64 -8 -68 4C-58 0 -50 6 -52 16C-44 12 -36 12 -32 6Z" fill="#fff" stroke="#AEB9DD" stroke-width="2" stroke-linejoin="round"/><path d="M-40 -10C-52 -22 -66 -22 -72 -14M-40 -2C-52 -8 -62 -6 -66 0" fill="none" stroke="#AEB9DD" stroke-width="1.6" stroke-linecap="round"/>`;
+    return h + mirror(h); }},
+  {id:'fox', slot:'tail', cat:'back', name:'Fox tail', vb:'-10 -16 72 76', draw:() =>
+    `<path d="M-4 -2C20 -16 52 -4 54 24C56 46 32 56 14 44C28 40 32 26 18 18C10 14 2 14 -4 10Z" fill="#F2A63B" stroke="#C7791B" stroke-width="2" stroke-linejoin="round"/><path d="M54 24C56 46 32 56 14 44C28 42 40 36 44 26C48 22 52 21 54 24Z" fill="#fff"/>`},
+  {id:'dragon', slot:'tail', cat:'back', name:'Dragon tail', vb:'-10 -16 72 76', draw:() =>
+    `<path d="M0 2C24 2 44 12 42 32C41 44 50 50 58 44" fill="none" stroke="#2E9C8C" stroke-width="12" stroke-linecap="round"/><path d="M0 2C24 2 44 12 42 32C41 44 50 50 58 44" fill="none" stroke="#5CC9B5" stroke-width="5" stroke-linecap="round" stroke-dasharray="1 9"/><path d="M12 -4L18 -14L24 -2ZM32 4L40 -4L42 8ZM44 22L54 18L52 30Z" fill="#F0625A"/><path d="M56 34L68 44L56 54Z" fill="#F0625A"/>`},
+  {id:'bunny', slot:'tail', cat:'back', name:'Bunny tail', vb:'-16 -16 54 54', draw:() =>
+    `<path d="${furPath(16, 16, 9, .12, 3)}" transform="translate(6 6)" fill="#fff" stroke="#D8DEF0" stroke-width="1.2"/>`}
+];
+const itemById = Object.fromEntries(ITEMS.map(i => [i.id, i]));
+const CATS = [{id:'head', icon:'crown'}, {id:'face', icon:'round'}, {id:'back', icon:'fairy'}];
+const GHOST = (cx, cy) => `<ellipse cx="${cx}" cy="${cy}" rx="42" ry="46" fill="#33285A" fill-opacity=".07"/>`;
+const thumb = it => `<svg viewBox="${it.vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${it.slot === 'wings' ? GHOST(0, 0) : ''}${it.draw()}</svg>`;
+const TILE_BG = {head:'#FFF1CF', face:'#DDF0FF', back:'#EDE3FF'};
+
+let dressKey = 'pink', outfit = {}, tab = 'head', photoBusy = false, drag = null;
+
+function wornGroup(it){
+  const [ax, ay] = SLOTS[it.slot], h = HITS[it.slot];
+  return `<g data-slot="${it.slot}" class="worn" transform="translate(${ax} ${ay})"><g class="pop">${it.draw()}</g>` +
+         (h ? `<circle cx="${h[0]}" cy="${h[1]}" r="${h[2]}" fill="transparent"/>` : '') + `</g>`;
+}
+function dressedSVG(){
+  const w = slot => outfit[slot] ? wornGroup(itemById[outfit[slot]]) : '';
+  return `<svg viewBox="-96 -110 192 204" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${w('wings')}${w('tail')}${moflinInner(THEMES[dressKey], 'dm')}${w('hat')}${w('face')}</svg>`;
+}
+function renderDress(){ dm.innerHTML = dressedSVG(); }
+
+function renderTabs(){
+  tabsEl.innerHTML = CATS.map(c => `<button class="tab" type="button" data-cat="${c.id}" aria-label="${{head:'Hats and crowns', face:'Glasses and masks', back:'Wings and tails'}[c.id]}" aria-selected="${c.id === tab}">${thumb(itemById[c.icon])}</button>`).join('');
+}
+function renderTray(){
+  renderTabs();
+  itemsEl.innerHTML = ITEMS.filter(i => i.cat === tab).map(i => `<button class="item" type="button" data-id="${i.id}" aria-label="${i.name}" style="--ib:${TILE_BG[i.cat]}">${thumb(i)}</button>`).join('');
+}
+tabsEl.addEventListener('click', e => {
+  const b = e.target.closest('.tab'); if (!b) return;
+  audio(); pip(); tab = b.dataset.cat; renderTray(); scheduleDHint();
+});
+
+function layoutDress(){
+  const r = dstage.getBoundingClientRect();
+  dstage.style.setProperty('--dm', Math.max(160, Math.floor(Math.min(r.width - 20, r.height - 8))) + 'px');
+}
+
+// ---- sparkles, photo, hints ----
+function sparkles(n, cx, cy){
+  const cols = ['#FFC83D', '#fff', '#FF8FB8', '#7CC6F7'];
+  for (let i = 0; i < n; i++){
+    const el = document.createElement('span'), sz = 12 + Math.random() * 16;
+    el.className = 'sp';
+    el.style.cssText = `left:${cx}px;top:${cy}px;width:${sz}px;height:${sz}px;margin:${-sz / 2}px 0 0 ${-sz / 2}px`;
+    el.innerHTML = `<svg viewBox="0 0 20 20"><path d="M10 0Q10 10 20 10Q10 10 10 20Q10 10 0 10Q10 10 10 0Z" fill="${cols[i % 4]}"/></svg>`;
+    fx.appendChild(el);
+    const ang = Math.random() * Math.PI * 2, d = 60 + Math.random() * 90;
+    const a = el.animate([
+      {transform:'translate(0,0) scale(.3) rotate(0deg)', opacity:0},
+      {transform:`translate(${Math.cos(ang) * d * .6}px,${Math.sin(ang) * d * .6}px) scale(1) rotate(90deg)`, opacity:1, offset:.4},
+      {transform:`translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) scale(.4) rotate(180deg)`, opacity:0}
+    ], {duration:800 + Math.random() * 500, easing:'ease-out'});
+    a.onfinish = () => el.remove();
+  }
+}
+const dmCenter = () => { const r = dwrap.getBoundingClientRect(); return {x:r.left + r.width / 2, y:r.top + r.height * .5}; };
+const wearSound = () => { tone(700, 1000, .1, {gain:.08}); tone(1000, 1500, .12, {gain:.08, delay:.09}); };
+
+function popWorn(slot){
+  const el = dm.querySelector(`[data-slot="${slot}"] .pop`);
+  if (el) el.animate([{transform:'scale(1.5)', opacity:.6}, {transform:'scale(.92)', offset:.6}, {transform:'scale(1)', opacity:1}], {duration:380, easing:'ease-out'});
+}
+function dmHop(H){
+  dm.animate(hopFrames(H), {duration:480});
+  dshadow.animate(shadowFrames, {duration:480});
+}
+function wear(it){
+  outfit[it.slot] = it.id;
+  renderDress(); popWorn(it.slot);
+  wearSound(); dmHop(dwrap.offsetHeight * .06);
+  const c = dmCenter(); sparkles(7, c.x, c.y - dwrap.offsetHeight * .1);
+}
+function pet(){
+  dmHop(dwrap.offsetHeight * .05); squeak(1 + Math.random() * .3);
+}
+
+// ---- dragging pieces on (and off) ----
+function beginDrag(e, id, fromWorn, holder){
+  const it = itemById[id];
+  const el = document.createElement('div');
+  el.className = 'dragitem'; el.innerHTML = thumb(it);
+  document.body.appendChild(el);
+  drag = {it, el, pid:e.pointerId, lift:e.pointerType === 'touch' ? 48 : 0, fromWorn, over:false, x:e.clientX, y:e.clientY, holder};
+  try { holder.setPointerCapture(e.pointerId); } catch (_) {}
+  stopDHint(); moveDrag(e);
+  el.animate([{opacity:.6, scale:'.7'}, {opacity:1, scale:'1.12'}], {duration:160, fill:'forwards'});
+}
+function moveDrag(e){
+  if (!drag || e.pointerId !== drag.pid) return;
+  const x = e.clientX, y = e.clientY - drag.lift;
+  drag.x = x; drag.y = y;
+  drag.el.style.transform = `translate(${x - 52}px,${y - 52}px)`;
+  const r = dwrap.getBoundingClientRect(), mx = r.width * .12, my = r.height * .06;
+  const over = x > r.left + mx && x < r.right - mx && y > r.top + my && y < r.bottom - my;
+  if (over !== drag.over){ drag.over = over; dwrap.classList.toggle('over', over); }
+}
+function endDrag(e, cancelled){
+  if (!drag || (e && e.pointerId !== drag.pid)) return;
+  const d = drag; drag = null;
+  dwrap.classList.remove('over');
+  if (d.over && !cancelled){
+    d.el.remove(); wear(d.it);
+  } else {
+    d.el.animate([{opacity:1}, {opacity:0, transform:d.el.style.transform + ' scale(.5)'}], {duration:200}).onfinish = () => d.el.remove();
+    if (d.fromWorn){ sparkles(5, d.x, d.y); tone(500, 260, .18, {gain:.07}); renderDress(); }
+    scheduleDHint();
+  }
+}
+itemsEl.addEventListener('pointerdown', e => {
+  const b = e.target.closest('.item');
+  if (!b || drag) return;
+  e.preventDefault(); audio(); pip();
+  beginDrag(e, b.dataset.id, false, itemsEl);
+});
+// keyboard: Enter or Space on a tray item puts it straight on the Moflin
+itemsEl.addEventListener('click', e => {
+  if (e.detail !== 0) return;
+  const b = e.target.closest('.item'); if (!b) return;
+  audio(); wear(itemById[b.dataset.id]);
+});
+dwrap.addEventListener('pointerdown', e => {
+  if (drag) return;
+  e.preventDefault(); audio();
+  const g = e.target.closest('[data-slot]');
+  if (!g){ pet(); return; }
+  const slot = g.dataset.slot, id = outfit[slot];
+  if (!id) return;
+  outfit[slot] = null; renderDress();       // lift it off; it goes back on if you drop it on the Moflin
+  beginDrag(e, id, true, dwrap);
+  moveDrag(e);
+});
+for (const h of [itemsEl, dwrap]){
+  h.addEventListener('pointermove', moveDrag);
+  h.addEventListener('pointerup', e => endDrag(e, false));
+  h.addEventListener('pointercancel', e => endDrag(e, true));
+}
+
+// ---- camera: pose, flash, photo ----
+const poseFrames = H => [
+  {transform:'translateY(0) rotate(0deg) scale(1,1)', offset:0, easing:'ease-out'},
+  {transform:'translateY(0) rotate(0deg) scale(1.1,.9)', offset:.14, easing:'ease-out'},
+  {transform:`translateY(${-H}px) rotate(-6deg) scale(.95,1.07)`, offset:.36, easing:'ease-in'},
+  {transform:'translateY(0) rotate(-6deg) scale(1.1,.92)', offset:.52, easing:'ease-out'},
+  {transform:'translateY(0) rotate(-7deg) scale(1.07)', offset:.62},
+  {transform:'translateY(0) rotate(-7deg) scale(1.07)', offset:.9, easing:'ease-in-out'},
+  {transform:'translateY(0) rotate(0deg) scale(1,1)', offset:1}
+];
+const shutterSound = () => { tone(1800, 900, .04, {type:'square', gain:.04}); tone(1300, 600, .06, {type:'square', gain:.04, delay:.07}); };
+
+function showPolaroid(){
+  fx.querySelectorAll('.polaroid').forEach(p => p.remove());
+  const p = document.createElement('div');
+  p.className = 'polaroid';
+  p.innerHTML = `<div class="pic">${dressedSVG().replace(/-dm\b/g, '-ph')}</div>`;
+  fx.appendChild(p);
+  const enter = p.animate([
+    {transform:'translate(-50%,120%) rotate(-12deg)'}, {transform:'translate(-50%,0) rotate(-4deg)'}
+  ], {duration:620, easing:'cubic-bezier(.2,1.2,.4,1)', fill:'forwards'});
+  let gone = false;
+  const leave = () => {
+    if (gone) return; gone = true;
+    enter.onfinish = null;
+    p.animate([{transform:'translate(-50%,0) rotate(-4deg)'}, {transform:'translate(-50%,130%) rotate(6deg)'}], {duration:420, easing:'ease-in', fill:'forwards'}).onfinish = () => p.remove();
+  };
+  p.addEventListener('pointerdown', leave);
+  setTimeout(leave, 3800);
+}
+cameraBtn.addEventListener('click', () => {
+  if (photoBusy) return;
+  audio(); photoBusy = true; stopDHint();
+  dm.classList.add('happy');
+  dm.animate(poseFrames(dwrap.offsetHeight * .09), {duration:1300});
+  dshadow.animate(shadowFrames, {duration:520});
+  chirp();
+  setTimeout(() => {
+    shutterSound();
+    flashEl.animate([{opacity:0}, {opacity:.95, offset:.15}, {opacity:0}], {duration:420});
+    const c = dmCenter(); sparkles(14, c.x, c.y - dwrap.offsetHeight * .05);
+    showPolaroid();
+  }, 800);
+  setTimeout(() => { photoBusy = false; dm.classList.remove('happy'); scheduleDHint(); }, 1500);
+});
+clearBtn.addEventListener('click', () => {
+  audio();
+  if (!Object.values(outfit).some(Boolean)) { pet(); return; }
+  outfit = {}; renderDress(); tone(500, 260, .2, {gain:.07});
+  const c = dmCenter(); sparkles(6, c.x, c.y); scheduleDHint();
+});
+
+// ---- a hand shows how to drag when nothing is on yet ----
+let dHintTimer = 0, dHintAnim = null;
+function stopDHint(){
+  clearTimeout(dHintTimer);
+  if (dHintAnim){ dHintAnim.cancel(); dHintAnim = null; }
+}
+function scheduleDHint(){
+  stopDHint();
+  dHintTimer = setTimeout(() => {
+    if (state !== 'dress' || drag || Object.values(outfit).some(Boolean)) return;
+    const first = itemsEl.querySelector('.item'); if (!first) return;
+    const a = first.getBoundingClientRect(), c = dmCenter(), W = 64;
+    const sx = a.left + a.width / 2 - W / 2, sy = a.top + a.height / 2 - W * HAND_TIP;
+    const ex = c.x - W / 2, ey = c.y - W * HAND_TIP;
+    dHintAnim = dhand.animate([
+      {transform:`translate(${sx}px,${sy}px) scale(1)`, opacity:0, offset:0},
+      {transform:`translate(${sx}px,${sy}px) scale(.92)`, opacity:1, offset:.15},
+      {transform:`translate(${ex}px,${ey}px) scale(.92)`, opacity:1, offset:.75},
+      {transform:`translate(${ex}px,${ey}px) scale(1)`, opacity:0, offset:1}
+    ], {duration:2200, iterations:Infinity, easing:'ease-in-out'});
+  }, 3500);
+}
+
+function startDress(key){
+  currentGame = 'dressup'; dressKey = key; outfit = {}; tab = 'head'; photoBusy = false;
+  dMoflinBtn.innerHTML = moflinSVG(THEMES[key], 'dbtn');
+  show('dress'); state = 'dress';
+  layoutDress(); renderDress(); renderTray();
+  scheduleDHint();
+}
+function leaveDress(){
+  stopDHint();
+  if (drag){ drag.el.remove(); drag = null; }
+  dwrap.classList.remove('over');
+  dm.getAnimations().forEach(a => a.cancel());
+  dm.classList.remove('happy');
+  fx.innerHTML = '';
+}
+
+// ---------- races ----------
+/*RACE-START*/
+// how far one tap moves the Moflin, and how fast the animal friends go (units per second, 100 = the finish line)
+const RACE_TAP = 5;
+const OPP_BASE = [5.4, 6.0, 6.6];
+// The friends race along on their own, but slow right down near the finish and are held back
+// if they get far ahead, so a child who keeps tapping always gets there first.
+function oppSpeed(base, wob, prog, playerProg){
+  const m = prog < 70 ? 1 : prog < 92 ? 1 - (prog - 70) / 22 * 0.88 : 0.12;
+  const catchup = clamp(1 + (playerProg - prog) / 80, 0.6, 1.25);
+  return base * wob * m * catchup;
+}
+/*RACE-END*/
+
+const vehicleScr = $('#vehicle'), vtiles = $('#vtiles'), raceScr = $('#race'), lanesEl = $('#lanes'), countEl = $('#countdown');
+const rAgainBtn = $('#rAgainBtn'), rMoflinBtn = $('#rMoflinBtn'), rVehicleBtn = $('#rVehicleBtn'), vMoflinBtn = $('#vMoflinBtn');
+
+const shade = (hex, t) => mixHex(hex, '#1E1633', t);
+
+// ---- the riders: the child's Moflin, and three animal friends ----
+function animalInner(kind){
+  const eyes = (y = -4) => `<circle cx="-14" cy="${y}" r="5" fill="#2A2036"/><circle cx="14" cy="${y}" r="5" fill="#2A2036"/><circle cx="-12.5" cy="${y - 1.8}" r="1.7" fill="#fff"/><circle cx="15.5" cy="${y - 1.8}" r="1.7" fill="#fff"/>`;
+  if (kind === 'bunny') return `
+<g transform="rotate(-10 -16 -30)"><ellipse cx="-16" cy="-44" rx="11" ry="27" fill="#fff" stroke="#E2E4EE" stroke-width="2"/><ellipse cx="-16" cy="-44" rx="5.5" ry="19" fill="#FFB7CE"/></g>
+<g transform="rotate(10 16 -30)"><ellipse cx="16" cy="-44" rx="11" ry="27" fill="#fff" stroke="#E2E4EE" stroke-width="2"/><ellipse cx="16" cy="-44" rx="5.5" ry="19" fill="#FFB7CE"/></g>
+<circle r="38" fill="#fff" stroke="#E2E4EE" stroke-width="2"/>
+<ellipse cx="-26" cy="8" rx="7" ry="4.5" fill="#FFB7CE" opacity=".7"/><ellipse cx="26" cy="8" rx="7" ry="4.5" fill="#FFB7CE" opacity=".7"/>
+${eyes()}<ellipse cx="0" cy="8" rx="5" ry="3.5" fill="#FF8FB8"/><path d="M0 11.5Q-5 18 -10 14M0 11.5Q5 18 10 14" fill="none" stroke="#5B3A63" stroke-width="2" stroke-linecap="round"/>`;
+  if (kind === 'bear') return `
+<circle cx="-28" cy="-30" r="13" fill="#B9773D"/><circle cx="-28" cy="-30" r="7" fill="#E8B98A"/><circle cx="28" cy="-30" r="13" fill="#B9773D"/><circle cx="28" cy="-30" r="7" fill="#E8B98A"/>
+<circle r="38" fill="#B9773D" stroke="#8A5A2B" stroke-width="2"/><ellipse cx="0" cy="12" rx="17" ry="13" fill="#E8B98A"/>
+${eyes(-6)}<ellipse cx="0" cy="4" rx="6.5" ry="4.5" fill="#33285A"/><path d="M0 8V13M0 13Q-5 19 -10 15M0 13Q5 19 10 15" fill="none" stroke="#33285A" stroke-width="2" stroke-linecap="round"/>`;
+  return `
+<circle cx="-22" cy="-28" r="14" fill="#6CC644" stroke="#3E8F2A" stroke-width="2"/><circle cx="22" cy="-28" r="14" fill="#6CC644" stroke="#3E8F2A" stroke-width="2"/>
+<circle cx="-22" cy="-28" r="9.5" fill="#fff"/><circle cx="22" cy="-28" r="9.5" fill="#fff"/><circle cx="-21" cy="-27" r="5" fill="#2A2036"/><circle cx="23" cy="-27" r="5" fill="#2A2036"/>
+<ellipse cx="0" cy="4" rx="40" ry="34" fill="#6CC644" stroke="#3E8F2A" stroke-width="2"/>
+<path d="M-28 10Q0 34 28 10" fill="none" stroke="#2F6F1F" stroke-width="3" stroke-linecap="round"/>
+<ellipse cx="-30" cy="8" rx="6" ry="4" fill="#FF8FB8" opacity=".6"/><ellipse cx="30" cy="8" rx="6" ry="4" fill="#FF8FB8" opacity=".6"/>
+<circle cx="-5" cy="-2" r="1.8" fill="#2F6F1F"/><circle cx="5" cy="-2" r="1.8" fill="#2F6F1F"/>`;
+}
+
+// ---- the four vehicles (all facing right, drawn in a 200 x 140 box) ----
+function carArt(c, rider){
+  const d = shade(c, .35);
+  const wheel = x => `<g class="wheel" data-cx="${x}" data-cy="118"><circle cx="${x}" cy="118" r="17" fill="#33285A"/><circle cx="${x}" cy="118" r="8" fill="#DDD"/><path d="M${x} 110V126M${x - 8} 118H${x + 8}" stroke="#999" stroke-width="3" stroke-linecap="round"/></g>`;
+  return `
+<g transform="translate(96 64) scale(.64)">${rider}</g>
+<path d="M14 108C14 90 28 82 46 82L150 82C170 82 188 90 188 108L188 116L14 116Z" fill="${c}"/>
+<path d="M46 82L150 82C160 82 172 85 180 92L46 92Z" fill="#fff" opacity=".18"/>
+<rect x="14" y="99" width="174" height="7" fill="#fff" opacity=".45"/>
+<path d="M128 82L142 58L152 58L152 82Z" fill="#CFEFFF" stroke="${d}" stroke-width="3" stroke-linejoin="round" opacity=".92"/>
+<rect x="12" y="92" width="8" height="10" rx="3" fill="#FF6B6B"/><circle cx="183" cy="98" r="5" fill="#FFE27A"/>
+${wheel(52)}${wheel(148)}`;
+}
+function trainArt(c, rider){
+  const b = shade(c, .18), d = shade(c, .4);
+  const wheel = (x, r) => `<g class="wheel" data-cx="${x}" data-cy="${r === 15 ? 118 : 124}"><circle cx="${x}" cy="${r === 15 ? 118 : 124}" r="${r}" fill="#33285A"/><circle cx="${x}" cy="${r === 15 ? 118 : 124}" r="${r / 2}" fill="${c}"/><path d="M${x} ${(r === 15 ? 118 : 124) - r + 3}V${(r === 15 ? 118 : 124) + r - 3}M${x - r + 3} ${r === 15 ? 118 : 124}H${x + r - 3}" stroke="#DDD" stroke-width="2.5" stroke-linecap="round"/></g>`;
+  return `
+<g transform="translate(46 70) scale(.6)">${rider}</g>
+<rect x="76" y="56" width="92" height="44" rx="14" fill="${b}"/>
+<path d="M92 56V100M118 56V100M144 56V100" stroke="${d}" stroke-width="3" opacity=".6"/>
+<circle cx="168" cy="78" r="22" fill="${d}"/><circle cx="185" cy="78" r="6" fill="#FFE27A"/>
+<path d="M136 56L141 36L157 36L162 56Z" fill="#33285A"/><rect x="134" y="30" width="30" height="8" rx="4" fill="#33285A"/>
+<circle cx="108" cy="56" r="10" fill="${d}"/>
+<path fill-rule="evenodd" d="M16 42H76V112H16Z M24 48H68V88H24Z" fill="${c}"/>
+<rect x="8" y="32" width="76" height="9" rx="4" fill="${d}"/>
+<rect x="16" y="100" width="172" height="10" rx="4" fill="#33285A"/>
+<path d="M188 104L200 122L188 122Z" fill="#8A6A4A"/>
+<rect x="56" y="112" width="76" height="4" rx="2" fill="#B9BFCC"/>
+${wheel(56, 15)}${wheel(94, 15)}${wheel(132, 15)}${wheel(170, 10)}`;
+}
+function planeArt(c, rider){
+  const d = shade(c, .3);
+  return `
+<path d="M38 84L14 46L42 54L62 80Z" fill="${d}"/><path d="M34 88L6 88L10 96L40 94Z" fill="${d}"/>
+<g transform="translate(108 49) scale(.48)">${rider}</g>
+<path d="M26 86C26 66 50 62 80 62L150 62C180 62 190 76 190 88C190 100 178 104 150 104L70 104C42 104 26 100 26 86Z" fill="${c}"/>
+<path d="M30 94L186 94" stroke="#fff" stroke-opacity=".5" stroke-width="5" stroke-linecap="round"/>
+<path d="M77 64C77 12 139 12 139 64Z" fill="#CFEFFF" fill-opacity=".3" stroke="#fff" stroke-width="2.5" stroke-linejoin="round"/>
+<path d="M88 92L132 92L122 112L78 112Z" fill="${d}"/>
+<circle cx="192" cy="86" r="8" fill="#DDD"/><ellipse class="prop" cx="196" cy="86" rx="4" ry="30" fill="#33285A" opacity=".55"/>
+<path d="M98 108V122" stroke="#33285A" stroke-width="4" stroke-linecap="round"/><g class="wheel" data-cx="98" data-cy="126"><circle cx="98" cy="126" r="9" fill="#33285A"/><circle cx="98" cy="126" r="3.5" fill="#DDD"/></g>`;
+}
+function horseArt(c, rider){
+  const md = shade(c, .5), far = shade(c, .22);
+  const leg = (x, y, col, ph) => `<g class="leg" data-cx="${x}" data-cy="${y}" data-ph="${ph}"><path d="M${x} ${y}L${x - 4} ${y + 30}" stroke="${col}" stroke-width="11" stroke-linecap="round"/><circle cx="${x - 4}" cy="${y + 32}" r="6" fill="#33285A"/></g>`;
+  return `
+<path d="M50 76C26 74 20 98 28 114C38 102 42 90 56 86Z" fill="${md}"/>
+${leg(72, 96, far, 3.6)}${leg(138, 96, far, 1.6)}
+<ellipse cx="100" cy="86" rx="48" ry="24" fill="${c}"/>
+${leg(60, 96, c, 0)}${leg(148, 96, c, 3.14)}
+<path d="M124 76C140 58 150 42 155 30L177 40C171 60 160 86 142 100Z" fill="${c}"/>
+<ellipse cx="177" cy="37" rx="20" ry="12" transform="rotate(28 177 37)" fill="${c}"/>
+<path d="M156 26L160 12L168 26Z" fill="${c}"/>
+<path d="M124 74C138 54 146 38 152 22L144 20C140 40 130 58 116 72Z" fill="${md}"/>
+<circle cx="180" cy="33" r="2.6" fill="#33285A"/><circle cx="192" cy="42" r="2" fill="#33285A" opacity=".6"/>
+<path d="M84 66Q100 60 116 66L114 84Q100 90 86 84Z" fill="#F0625A" stroke="#fff" stroke-width="2" stroke-linejoin="round"/>
+<g transform="translate(100 50) scale(.56)">${rider}</g>
+<path d="M124 56Q152 54 176 44" fill="none" stroke="#33285A" stroke-width="2" stroke-linecap="round"/>`;
+}
+const ART_FN = {car:carArt, train:trainArt, plane:planeArt, horse:horseArt};
+const vehicleSVG = (type, color, rider) => `<svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${ART_FN[type](color, rider)}</svg>`;
+const VEHICLES = [
+  {id:'car',   label:'Car',   bg:'#BFE0FF'},
+  {id:'train', label:'Train', bg:'#FFD9B8'},
+  {id:'plane', label:'Plane', bg:'#D7F0FF'},
+  {id:'horse', label:'Horse', bg:'#D4F1C5'}
+];
+const PLAYER_COLOR = {car:'#F0625A', train:'#F0625A', plane:'#F0625A', horse:'#B9773D'};
+const OTHER_COLORS = {car:['#3E9BF2', '#3DBFA6', '#FFC83D'], train:['#3E9BF2', '#3DBFA6', '#FFC83D'], plane:['#3E9BF2', '#3DBFA6', '#FFC83D'], horse:['#B8BEC9', '#4A4058', '#EBC27A']};
+const ANIMALS = ['bunny', 'bear', 'frog'];
+
+let raceKey = 'gold', raceType = 'car', race = null, raceToken = 0, rHintAnim = null;
+
+// ---- choosing a vehicle ----
+function vehicleTileArt(type){
+  let ties = '';
+  for (let x = 6; x < 200; x += 26) ties += `<rect x="${x}" y="150" width="9" height="28" fill="#8A6A4A"/>`;
+  const ground = {
+    car:   `<rect x="0" y="146" width="200" height="54" fill="#5B5F7A"/><path d="M6 176H194" stroke="#fff" stroke-width="5" stroke-dasharray="18 14" stroke-linecap="round"/>`,
+    train: `<rect x="0" y="146" width="200" height="54" fill="#CDBB93"/>${ties}<path d="M0 152H200M0 172H200" stroke="#9AA0AE" stroke-width="4"/>`,
+    plane: `<ellipse cx="34" cy="166" rx="30" ry="12" fill="#fff" opacity=".9"/><ellipse cx="96" cy="182" rx="26" ry="10" fill="#fff" opacity=".8"/><ellipse cx="160" cy="170" rx="36" ry="13" fill="#fff" opacity=".9"/><ellipse cx="170" cy="30" rx="22" ry="9" fill="#fff" opacity=".8"/>`,
+    horse: `<rect x="0" y="146" width="200" height="54" fill="#8FD08B"/><path d="M0 172H200" stroke="#7CBB78" stroke-width="3"/>`
+  }[type];
+  return svgArt(`${ground}<g transform="translate(0 6)">${ART_FN[type](PLAYER_COLOR[type], moflinInner(THEMES[raceKey], 'v-' + type))}</g>`);
+}
+function renderVehicleTiles(){
+  vtiles.innerHTML = '';
+  VEHICLES.forEach(v => {
+    const b = document.createElement('button');
+    b.className = 'tile'; b.type = 'button'; b.dataset.vehicle = v.id;
+    b.style.setProperty('--tile-bg', v.bg);
+    b.setAttribute('aria-label', v.label);
+    b.innerHTML = `<span class="art">${vehicleTileArt(v.id)}</span><span class="tag">${v.label}</span>`;
+    vtiles.appendChild(b);
+  });
+}
+function layoutVehicle(){
+  const r = vtiles.getBoundingClientRect();
+  const row = window.innerWidth / window.innerHeight >= 1.25, gap = 14;
+  const size = row ? Math.min((r.width - 32 - gap * 3) / 4, r.height - 32)
+                   : Math.min((r.width - 32 - gap) / 2, (r.height - 32 - gap) / 2);
+  vtiles.style.setProperty('--tile', Math.max(90, Math.floor(size)) + 'px');
+}
+vtiles.addEventListener('click', e => {
+  const b = e.target.closest('.tile');
+  if (!b || tileBusy) return;
+  audio(); tileBusy = true; chirp();
+  b.animate([{transform:'scale(1)'}, {transform:'scale(.93)'}, {transform:'scale(1)'}], {duration:280});
+  setTimeout(() => { tileBusy = false; startRace(b.dataset.vehicle); }, 300);
+});
+function chooseMoflin(key){
+  if (pendingGame === 'dressup') startDress(key);
+  else if (pendingGame === 'races'){ raceKey = key; goVehicle(); }
+  else if (pendingGame === 'spelling') startSpell(key);
+  else startGame(key);
+}
+
+// ---- the race ----
+const TAP_SOUNDS = {
+  car:   () => tone(140, 240, .13, {type:'sawtooth', gain:.05}),
+  train: () => { tone(230, 120, .09, {type:'square', gain:.035}); tone(200, 110, .09, {type:'square', gain:.035, delay:.11}); },
+  plane: () => tone(300, 560, .16, {type:'sawtooth', gain:.04}),
+  horse: () => { tone(420, 240, .06, {type:'triangle', gain:.09}); tone(380, 220, .06, {type:'triangle', gain:.09, delay:.09}); }
+};
+
+function buildRace(){
+  const token = ++raceToken;
+  lanesEl.className = 'lanes t-' + raceType;
+  lanesEl.innerHTML = '';
+  race = {type:raceType, token, phase:'count', racers:[], placed:0, player:null, W:300, LH:100, vw:100, vh:70, startX:8, finishX:240, track:120, cd:0};
+  const playerLane = Math.floor(Math.random() * 4);
+  const animals = shuffle(ANIMALS.slice()), bases = shuffle(OPP_BASE.slice()), cols = OTHER_COLORS[raceType];
+  let ai = 0;
+  for (let i = 0; i < 4; i++){
+    const lane = document.createElement('div');
+    lane.className = 'lane' + (i === playerLane ? ' mine' : '');
+    lanesEl.appendChild(lane);
+    const mine = i === playerLane;
+    const kind = mine ? 'moflin' : animals[ai];
+    const color = mine ? PLAYER_COLOR[raceType] : cols[ai];
+    const rider = mine ? moflinInner(THEMES[raceKey], 'rp') : animalInner(kind);
+    const el = document.createElement('div');
+    el.className = 'racer';
+    el.innerHTML = `<div class="rbody">${vehicleSVG(raceType, color, rider)}</div>`;
+    lane.appendChild(el);
+    const r = {i, kind, mine, el, lane, body:el.firstChild, prog:0, target:0, speed:0, finished:false, place:0, puffT:0,
+               base:mine ? 0 : bases[ai], f:.7 + Math.random() * .6, ph:Math.random() * 6.28, lastTap:0,
+               wheels:[...el.querySelectorAll('.wheel')], legs:[...el.querySelectorAll('.leg')]};
+    if (!mine) ai++;
+    race.racers.push(r);
+    if (mine) race.player = r;
+  }
+  lanesEl.insertAdjacentHTML('beforeend', '<div class="startline"></div><div class="finishline"></div>');
+}
+function layoutRace(){
+  if (!race) return;
+  const r = lanesEl.getBoundingClientRect();
+  race.W = r.width; race.LH = r.height / 4;
+  race.vw = Math.min(race.LH * .92 * 1.43, race.W * .34); race.vh = race.vw / 1.43;
+  race.startX = race.W * .03; race.finishX = race.W - 62;
+  race.track = race.finishX - race.vw * .92 - race.startX;
+  lanesEl.style.setProperty('--vw', race.vw + 'px');
+  lanesEl.style.setProperty('--vh', race.vh + 'px');
+  lanesEl.style.setProperty('--fin', race.finishX + 'px');
+  lanesEl.style.setProperty('--sl', (race.startX + race.vw * .08) + 'px');
+  renderRacers(performance.now(), 0);
+}
+function spawnPuff(r, x, y){
+  const {vw, vh} = race, t = race.type;
+  let px, py, col, size, dx, dy;
+  if (t === 'car'){ px = x + vw * .04; py = y + vh * .8; col = 'rgba(120,120,140,.55)'; size = 8 + Math.random() * 6; dx = -28; dy = -6; }
+  else if (t === 'train'){ px = x + vw * .78; py = y + vh * .2; col = 'rgba(255,255,255,.9)'; size = 10 + Math.random() * 8; dx = -22; dy = -30; }
+  else if (t === 'plane'){ px = x + vw * .06; py = y + vh * .62; col = 'rgba(255,255,255,.85)'; size = 8 + Math.random() * 6; dx = -34; dy = 0; }
+  else { px = x + vw * .32; py = y + vh * .94; col = 'rgba(160,120,70,.6)'; size = 7 + Math.random() * 6; dx = -26; dy = -8; }
+  const el = document.createElement('i');
+  el.className = 'puff';
+  el.style.cssText = `left:${px - size / 2}px;top:${py - size / 2}px;width:${size}px;height:${size}px;background:${col}`;
+  r.lane.appendChild(el);
+  const a = el.animate([{transform:'translate(0,0) scale(.6)', opacity:.9}, {transform:`translate(${dx}px,${dy}px) scale(1.8)`, opacity:0}], {duration:700, easing:'ease-out'});
+  a.onfinish = () => el.remove();
+}
+function renderRacers(now, dt){
+  const {vh, LH, type} = race, y = LH - vh - LH * .04;
+  for (const r of race.racers){
+    const x = race.startX + r.prog / 100 * race.track;
+    r.el.style.transform = `translate3d(${x}px,${y}px,0)`;
+    const mv = clamp((r.speed || 0) / 5, 0, 1);
+    const tilt = type === 'plane' ? Math.sin(now / 400 + r.i) * 2.2 : type === 'horse' ? -mv * 2 : 0;
+    const bob = type === 'plane' ? Math.sin(now / 500 + r.i * 2) * 2.5 : Math.sin(r.prog * .9) * mv * 1.6;
+    r.body.style.transform = `translateY(${bob.toFixed(2)}px) rotate(${tilt.toFixed(2)}deg)`;
+    const spin = (r.prog * 14) % 360;
+    for (const w of r.wheels) w.setAttribute('transform', `rotate(${spin.toFixed(1)} ${w.dataset.cx} ${w.dataset.cy})`);
+    for (const l of r.legs) l.setAttribute('transform', `rotate(${(Math.sin(r.prog * .9 + parseFloat(l.dataset.ph)) * 36 * mv).toFixed(1)} ${l.dataset.cx} ${l.dataset.cy})`);
+    r.puffT += dt;
+    if (mv > .3 && r.puffT > .11){ r.puffT = 0; spawnPuff(r, x, y); }
+  }
+}
+function hopRacer(r, big){
+  r.body.animate(hopFrames(race.vh * (big ? .5 : .16)), {duration:big ? 520 : 260});
+}
+function finishRacer(r){
+  r.finished = true; r.prog = 100; r.speed = 0; r.place = ++race.placed;
+  const m = document.createElement('div');
+  m.className = 'medal m' + r.place; m.textContent = r.place;
+  r.lane.appendChild(m);
+  m.animate([{transform:'scale(0)'}, {transform:'scale(1.3)', offset:.6}, {transform:'scale(1)'}], {duration:420});
+  if (r.mine) onPlayerFinished(r);
+}
+function onPlayerFinished(r){
+  const tok = race.token;
+  race.phase = 'done';
+  stopRHint();
+  r.body.classList.add('happy');
+  const box = r.body.getBoundingClientRect();
+  if (r.place === 1){
+    jingle(); burst(70, box);
+    [0, 1, 2].forEach(i => setTimeout(() => { if (race && race.token === tok) hopRacer(r, true); }, i * 560));
+    setTimeout(() => { if (race && race.token === tok) floatHearts(4, r.body.getBoundingClientRect()); }, 300);
+    sr.textContent = 'You won the race! Tap the Moflin to make it jump.';
+  } else {
+    chirp(); hopRacer(r, true); floatHearts(3, box);
+    sr.textContent = 'You finished the race! Tap the Moflin to make it jump.';
+  }
+  setTimeout(() => { if (race && race.token === tok) rAgainBtn.classList.add('show'); }, 1100);
+  setTimeout(() => { if (race && race.token === tok && race.phase === 'done') showRaceHint(); }, 2600);
+}
+function raceTap(){
+  if (!race) return;
+  const p = race.player;
+  if (race.phase === 'count'){ hopRacer(p, false); return; }
+  if (p.finished){ stopRHint(); hopRacer(p, true); squeak(1 + Math.random() * .4); floatHearts(2, p.body.getBoundingClientRect()); return; }
+  p.target = Math.min(100, p.target + RACE_TAP);
+  p.lastTap = performance.now();
+  stopRHint();
+  TAP_SOUNDS[race.type]();
+  hopRacer(p, false);
+}
+lanesEl.addEventListener('pointerdown', e => {
+  if (!e.target.closest('.lane.mine')) return;
+  e.preventDefault(); audio();
+  raceTap();
+});
+function raceStep(dt, t){
+  if (!race || race.phase === 'count'){ if (race) renderRacers(t, dt); return; }
+  const now = performance.now(), p = race.player;
+  if (!p.finished){
+    const d = p.target - p.prog;
+    if (d > 0){ const s = Math.min(d, 60 * dt); p.prog += s; p.speed = s / dt; } else p.speed = 0;
+  }
+  for (const o of race.racers){
+    if (o.mine || o.finished) continue;
+    const wob = 1 + 0.18 * Math.sin(now / 1000 * o.f + o.ph);
+    let sp = oppSpeed(o.base, wob, o.prog, p.prog);
+    if (race.phase === 'done') sp = Math.max(sp * 3, 45);      // once the child is home, let everyone finish quickly
+    o.prog = Math.min(100, o.prog + sp * dt); o.speed = sp;
+  }
+  for (const r of race.racers) if (!r.finished && r.prog >= 100) finishRacer(r);
+  if (race.phase === 'go' && !rHintAnim && !p.finished && now - p.lastTap > 3500) showRaceHint();
+  renderRacers(now, dt);
+}
+
+// ---- countdown and hints ----
+const CD = [{t:'3', c:'#F0625A', f:440}, {t:'2', c:'#FF9F43', f:494}, {t:'1', c:'#F2B705', f:554}, {t:'GO', c:'#3DBFA6', f:880}];
+function startCountdown(){
+  const tok = race.token;
+  let i = 0;
+  const step = () => {
+    if (!race || race.token !== tok) return;
+    const s = CD[i];
+    countEl.hidden = false; countEl.textContent = s.t; countEl.style.background = s.c;
+    countEl.animate([{transform:'translate(-50%,-50%) scale(.4)', opacity:0}, {transform:'translate(-50%,-50%) scale(1.15)', opacity:1, offset:.5}, {transform:'translate(-50%,-50%) scale(1)'}], {duration:420, easing:'ease-out'});
+    tone(s.f, s.f, i === 3 ? .5 : .22, {type:'triangle', gain:.1});
+    i++;
+    if (i < CD.length){ race.cd = setTimeout(step, 800); }
+    else {
+      race.phase = 'go'; race.player.lastTap = performance.now() - 2500;
+      race.cd = setTimeout(() => { countEl.hidden = true; }, 800);
+    }
+  };
+  race.cd = setTimeout(step, 400);
+}
+function stopRHint(){ if (rHintAnim){ rHintAnim.cancel(); rHintAnim = null; } }
+function showRaceHint(){
+  stopRHint();
+  if (!race) return;
+  const b = race.player.body.getBoundingClientRect(), W = 64;
+  const bx = b.left + b.width * .45 - W / 2, by = b.top + b.height * .5 - W * HAND_TIP;
+  rHintAnim = dhand.animate([
+    {transform:`translate(${bx}px,${by + 34}px) scale(1)`, opacity:0, offset:0},
+    {transform:`translate(${bx}px,${by + 8}px) scale(1)`, opacity:1, offset:.3},
+    {transform:`translate(${bx}px,${by - 2}px) scale(.9)`, opacity:1, offset:.45},
+    {transform:`translate(${bx}px,${by + 8}px) scale(1)`, opacity:1, offset:.6},
+    {transform:`translate(${bx}px,${by + 34}px) scale(1)`, opacity:0, offset:1}
+  ], {duration:1500, iterations:Infinity});
+}
+
+function startRace(type){
+  currentGame = 'races'; raceType = type;
+  rMoflinBtn.innerHTML = moflinSVG(THEMES[raceKey], 'rbtn');
+  rVehicleBtn.innerHTML = vehicleSVG(type, PLAYER_COLOR[type], '');
+  rAgainBtn.classList.remove('show');
+  fx.innerHTML = ''; stopRHint(); sr.textContent = '';
+  show('race'); state = 'race';
+  buildRace(); layoutRace(); startCountdown();
+}
+function leaveRace(){
+  if (race){ clearTimeout(race.cd); race.token = -1; }
+  race = null; raceToken++;
+  stopRHint();
+  countEl.hidden = true;
+  rAgainBtn.classList.remove('show');
+}
+function goVehicle(){
+  state = 'vehicle';
+  stopHint(); resetActors(); leaveDress(); leaveRace(); leaveSpell();
+  vMoflinBtn.innerHTML = moflinSVG(THEMES[raceKey], 'vbtn');
+  show('vehicle'); renderVehicleTiles(); layoutVehicle();
+}
+
+// ---------- spelling: drag the letter blocks into the slots ----------
+/*SPELL-START*/
+const WORDS3 = [['cat','🐱'],['dog','🐶'],['sun','☀️'],['bus','🚌'],['hat','🎩'],['pig','🐷'],['bed','🛏️'],['fox','🦊'],['bee','🐝'],['cow','🐮'],
+                ['car','🚗'],['egg','🥚'],['key','🔑'],['box','📦'],['ant','🐜'],['owl','🦉'],['bug','🐛'],['pie','🥧'],['van','🚐'],['ear','👂']];
+const WORDS4 = [['fish','🐟'],['duck','🦆'],['frog','🐸'],['moon','🌙'],['star','⭐'],['bird','🐦']];
+
+// where everything sits on the board (all in pixels), for a word of n letters
+function spellGeom(W, H, n){
+  const gap = Math.max(8, Math.round(W * .025));
+  let b = Math.max(44, Math.floor(Math.min(96, (W - 24 - gap * (n - 1)) / n, H * .2)));
+  let P = Math.floor(Math.min(W * .56, H * .38, 220));
+  const need = () => P + 20 + b + 30 + b;
+  while (need() > H - 8 && (P > 84 || b > 44)){ if (P > 84) P -= 6; if (need() > H - 8 && b > 44) b -= 3; }
+  const total = need();
+  const top = Math.max(4, Math.floor((H - total) * .4));
+  const rowW = n * b + (n - 1) * gap, x0 = Math.round((W - rowW) / 2);
+  const y0 = top + P + 20, y1 = y0 + b + 30;
+  const M = Math.max(44, Math.min(P * .5, (W - P) / 2 - 6, 96));
+  return {gap, b, P, top, x0, y0, y1, M, rowW, total};
+}
+// the blocks start in a jumbled order (never already spelled)
+function spellShuffle(word){
+  const src = word.toUpperCase().split('');
+  let a;
+  do { a = shuffle(src.slice()); } while (a.join('') === src.join('') && new Set(src).size > 1);
+  return a;
+}
+/*SPELL-END*/
+
+const spellScr = $('#spell'), sboard = $('#sboard'), sMoflinBtn = $('#sMoflinBtn');
+const BLOCK_COLS = ['#F0625A', '#3E9BF2', '#2FAE93', '#8E6BE8', '#E9962B', '#E0559E'];
+let spellKey = 'gold', sp = null, sBag = {3:[], 4:[]}, sHintTimer = 0, sHintAnim = null;
+
+function nextSpellWord(){
+  const four = Math.random() < .25, len = four ? 4 : 3, list = four ? WORDS4 : WORDS3;
+  if (!sBag[len].length) sBag[len] = shuffle(list.slice());
+  return sBag[len].pop();
+}
+const slotPitch = i => [523.25, 587.33, 659.25, 783.99][i % 4];
+
+function buildWord(){
+  stopSHint();
+  const [word, emoji] = nextSpellWord();
+  const letters = spellShuffle(word), n = word.length;
+  sboard.innerHTML = '';
+  sp = {word:word.toUpperCase(), emoji, n, done:false, drag:null, busy:0, slots:[], blocks:[], g:null, lastSlotMiss:-1};
+  const band = document.createElement('div'); band.className = 'sband'; sboard.appendChild(band); sp.band = band;
+  const pic = document.createElement('button');
+  pic.className = 'spic'; pic.type = 'button'; pic.setAttribute('aria-label', 'Picture: ' + word);
+  pic.innerHTML = `<span>${emoji}</span>`; sboard.appendChild(pic); sp.pic = pic;
+  const mo = document.createElement('div'); mo.className = 'smoflin'; mo.setAttribute('role', 'button'); mo.setAttribute('aria-label', 'Moflin');
+  mo.innerHTML = `<div class="smoj">${moflinSVG(THEMES[spellKey], 'sp')}</div>`; sboard.appendChild(mo); sp.mo = mo;
+  const nx = document.createElement('button'); nx.className = 'snext'; nx.type = 'button'; nx.setAttribute('aria-label', 'Next word');
+  nx.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'; sboard.appendChild(nx); sp.nx = nx;
+  for (let i = 0; i < n; i++){
+    const s = document.createElement('div'); s.className = 'sslot'; sboard.appendChild(s);
+    sp.slots.push({el:s, filled:false, misses:0, cx:0, cy:0, x:0, y:0});
+  }
+  letters.forEach((ch, i) => {
+    const el = document.createElement('div');
+    el.className = 'sblock'; el.dataset.i = i; el.textContent = ch;
+    el.setAttribute('role', 'button'); el.setAttribute('tabindex', '0'); el.setAttribute('aria-label', 'Letter ' + ch);
+    el.style.background = BLOCK_COLS[i % BLOCK_COLS.length];
+    sboard.appendChild(el);
+    sp.blocks.push({el, ch, x:0, y:0, hx:0, hy:0, placed:-1, busy:false});
+  });
+  layoutSpell(true);
+  sp.blocks.forEach((blk, i) => blk.el.animate([{transform:`translate(${blk.x}px,${blk.y + 40}px) scale(.4)`, opacity:0}, {transform:`translate(${blk.x}px,${blk.y}px) scale(1)`, opacity:1}], {duration:380, delay:120 + i * 90, easing:'cubic-bezier(.2,1.4,.4,1)', fill:'backwards'}));
+  pic.animate([{transform:'scale(.6) rotate(-6deg)', opacity:0}, {transform:'scale(1.06) rotate(2deg)', offset:.7}, {transform:'scale(1) rotate(0)', opacity:1}], {duration:460, easing:'ease-out'});
+  scheduleSHint(3800);
+}
+
+function layoutSpell(initial){
+  if (!sp) return;
+  const r = sboard.getBoundingClientRect(), W = r.width, H = r.height;
+  if (!W || !H) return;
+  const g = spellGeom(W, H, sp.n); sp.g = g;
+  sboard.style.setProperty('--b', g.b + 'px');
+  Object.assign(sp.pic.style, {left:Math.round((W - g.P) / 2) + 'px', top:g.top + 'px', width:g.P + 'px', height:g.P + 'px'});
+  sp.pic.firstChild.style.fontSize = Math.round(g.P * .62) + 'px';
+  const mx = Math.max(2, Math.round((W - g.P) / 2 - g.M - 4)), my = g.top + g.P - g.M;
+  Object.assign(sp.mo.style, {left:mx + 'px', top:my + 'px', width:g.M + 'px', height:g.M + 'px'});
+  const nxSize = Math.round(g.M * .82);
+  Object.assign(sp.nx.style, {left:Math.round((W + g.P) / 2 + 8 + (g.M - nxSize) / 2) + 'px', top:(g.top + g.P - nxSize - 4) + 'px', width:nxSize + 'px', height:nxSize + 'px'});
+  Object.assign(sp.band.style, {left:Math.max(0, g.x0 - 14) + 'px', width:Math.min(W, g.rowW + 28) + 'px', top:(g.y0 - 12) + 'px', height:(g.b + 24) + 'px'});
+  sp.slots.forEach((s, i) => {
+    s.x = g.x0 + i * (g.b + g.gap); s.y = g.y0; s.cx = s.x + g.b / 2; s.cy = s.y + g.b / 2;
+    Object.assign(s.el.style, {left:s.x + 'px', top:s.y + 'px', width:g.b + 'px', height:g.b + 'px'});
+  });
+  sp.blocks.forEach((blk, i) => {
+    blk.hx = g.x0 + i * (g.b + g.gap); blk.hy = g.y1;
+    if (blk.placed >= 0){ blk.x = sp.slots[blk.placed].x; blk.y = sp.slots[blk.placed].y; }
+    else if (!sp.drag || sp.drag.blk !== blk){ blk.x = blk.hx; blk.y = blk.hy; }
+    blk.el.style.transform = `translate(${blk.x}px,${blk.y}px)`;
+  });
+}
+const sboardPos = e => { const r = sboard.getBoundingClientRect(); return {x:e.clientX - r.left, y:e.clientY - r.top, r}; };
+const sToPage = (x, y) => { const r = sboard.getBoundingClientRect(); return {x:r.left + x, y:r.top + y}; };
+
+// ---- dragging blocks ----
+sboard.addEventListener('pointerdown', e => {
+  if (!sp || sp.done) return;
+  const el = e.target.closest('.sblock');
+  if (!el){
+    if (e.target.closest('.spic')){ audio(); pip(); sp.pic.animate([{transform:'rotate(0)'}, {transform:'rotate(-5deg) scale(1.05)'}, {transform:'rotate(4deg)'}, {transform:'rotate(0)'}], {duration:380}); }
+    else if (e.target.closest('.smoflin')){ audio(); spellHop(false); }
+    return;
+  }
+  const blk = sp.blocks[+el.dataset.i];
+  if (!blk || blk.placed >= 0 || blk.busy || sp.drag) return;
+  e.preventDefault(); audio(); pip(); stopSHint();
+  const p = sboardPos(e), b = sp.g.b;
+  sp.drag = {blk, pid:e.pointerId, lift:e.pointerType === 'touch' ? 44 : 0, dx:p.x - (blk.x + b / 2), dy:p.y - (blk.y + b / 2), hot:-1};
+  el.classList.add('lift');
+  try { sboard.setPointerCapture(e.pointerId); } catch (_) {}
+  dragBlockTo(e);
+});
+function nearestSlot(cx, cy){
+  let best = -1, bd = 1e9;
+  sp.slots.forEach((s, i) => { if (s.filled) return; const d = Math.hypot(cx - s.cx, cy - s.cy); if (d < bd){ bd = d; best = i; } });
+  return bd < sp.g.b * .85 ? best : -1;
+}
+function dragBlockTo(e){
+  const d = sp && sp.drag; if (!d || e.pointerId !== d.pid) return;
+  const p = sboardPos(e), b = sp.g.b;
+  d.blk.x = p.x - d.dx - b / 2; d.blk.y = p.y - d.dy - d.lift - b / 2;
+  d.blk.el.style.transform = `translate(${d.blk.x}px,${d.blk.y}px) scale(1.1)`;
+  const hot = nearestSlot(d.blk.x + b / 2, d.blk.y + b / 2);
+  if (hot !== d.hot){
+    if (d.hot >= 0) sp.slots[d.hot].el.classList.remove('hot');
+    if (hot >= 0) sp.slots[hot].el.classList.add('hot');
+    d.hot = hot;
+  }
+}
+function endDragBlock(e, cancelled){
+  const d = sp && sp.drag; if (!d || (e && e.pointerId !== d.pid)) return;
+  sp.drag = null;
+  d.blk.el.classList.remove('lift');
+  sp.slots.forEach(s => s.el.classList.remove('hot'));
+  const b = sp.g.b, cx = d.blk.x + b / 2, cy = d.blk.y + b / 2;
+  const i = cancelled ? -1 : nearestSlot(cx, cy);
+  if (i < 0){ sendHome(d.blk); scheduleSHint(5000); return; }
+  if (sp.word[i] === d.blk.ch) placeBlock(d.blk, i); else wrongDrop(d.blk, i);
+}
+sboard.addEventListener('pointermove', dragBlockTo);
+sboard.addEventListener('pointerup', e => endDragBlock(e, false));
+sboard.addEventListener('pointercancel', e => endDragBlock(e, true));
+
+function flyTo(blk, x, y, ms, ease, done){
+  const from = `translate(${blk.x}px,${blk.y}px)`, to = `translate(${x}px,${y}px)`;
+  blk.busy = true; blk.x = x; blk.y = y;
+  const a = blk.el.animate([{transform:from + ' scale(1.1)'}, {transform:to + ' scale(1)'}], {duration:ms, easing:ease || 'cubic-bezier(.3,1.3,.5,1)'});
+  blk.el.style.transform = to;
+  a.onfinish = () => { blk.busy = false; if (done) done(); };
+  a.oncancel = () => { blk.busy = false; };
+}
+function sendHome(blk){ flyTo(blk, blk.hx, blk.hy, 300); }
+
+function placeBlock(blk, i){
+  const s = sp.slots[i];
+  s.filled = true; blk.placed = i;
+  blk.el.classList.add('placed'); blk.el.setAttribute('tabindex', '-1');
+  flyTo(blk, s.x, s.y, 260, 'cubic-bezier(.2,1.5,.4,1)', () => {
+    blk.el.animate([{transform:`translate(${s.x}px,${s.y}px) scale(1)`}, {transform:`translate(${s.x}px,${s.y - sp.g.b * .16}px) scale(1.08,.94)`, offset:.4}, {transform:`translate(${s.x}px,${s.y}px) scale(1)`}], {duration:260});
+  });
+  s.el.classList.add('ok');
+  tone(slotPitch(i), slotPitch(i) * 1.005, .3, {type:'triangle', gain:.1});
+  const pt = sToPage(s.cx, s.cy); sparkles(6, pt.x, pt.y);
+  spellHop(false);
+  if (sp.slots.every(x => x.filled)) finishWord(); else scheduleSHint(5000);
+}
+function wrongDrop(blk, i){
+  const s = sp.slots[i];
+  s.misses++;
+  tone(320, 200, .22, {gain:.07});
+  s.el.animate([{transform:'translateX(0)'}, {transform:'translateX(-6px)'}, {transform:'translateX(6px)'}, {transform:'translateX(-4px)'}, {transform:'translateX(0)'}], {duration:340});
+  sendHome(blk);
+  if (s.misses >= 2) glowRight(i);
+  scheduleSHint(4500);
+}
+// a gentle nudge after a couple of wrong tries: the right block wobbles
+function glowRight(i){
+  sp.blocks.filter(b => b.placed < 0 && b.ch === sp.word[i]).forEach(b => {
+    b.el.animate([{transform:`translate(${b.x}px,${b.y}px) scale(1)`}, {transform:`translate(${b.x}px,${b.y - sp.g.b * .12}px) scale(1.14)`, offset:.5}, {transform:`translate(${b.x}px,${b.y}px) scale(1)`}], {duration:700, iterations:3});
+  });
+}
+// keyboard: Enter or Space sends a block to the next slot it belongs in
+sboard.addEventListener('keydown', e => {
+  if (!sp || sp.done || (e.key !== 'Enter' && e.key !== ' ')) return;
+  const el = e.target.closest && e.target.closest('.sblock'); if (!el) return;
+  e.preventDefault(); audio();
+  const blk = sp.blocks[+el.dataset.i]; if (!blk || blk.placed >= 0 || blk.busy) return;
+  const i = sp.slots.findIndex((s, k) => !s.filled && sp.word[k] === blk.ch);
+  if (i >= 0) placeBlock(blk, i);
+});
+
+function spellHop(big){
+  const m = sp && sp.mo && sp.mo.firstChild; if (!m) return;
+  m.animate(hopFrames(sp.g.M * (big ? .45 : .2)), {duration:big ? 520 : 380});
+  squeak(1 + Math.random() * .3);
+}
+function finishWord(){
+  sp.done = true; stopSHint();
+  const b = sp.g.b, n = sp.n;
+  sp.blocks.forEach((blk, k) => {
+    const s = sp.slots[blk.placed];
+    blk.el.animate([{transform:`translate(${s.x}px,${s.y}px) scale(1)`}, {transform:`translate(${s.x}px,${s.y - b * .35}px) scale(1.1,.95)`, offset:.45}, {transform:`translate(${s.x}px,${s.y}px) scale(1)`}],
+                   {duration:440, delay:380 + blk.placed * 170, easing:'ease-in-out'});
+    tone(slotPitch(blk.placed) * 2, slotPitch(blk.placed) * 2.01, .28, {type:'triangle', gain:.09, delay:.38 + blk.placed * .17});
+  });
+  const t = 380 + n * 170 + 200;
+  setTimeout(() => {
+    if (!sp || !sp.done) return;
+    jingle();
+    const pc = sp.pic.getBoundingClientRect();
+    burst(60, {x:pc.left + pc.width / 2, y:pc.top + pc.height / 2});
+    sp.pic.animate([{transform:'scale(1) rotate(0)'}, {transform:'scale(1.14) rotate(-4deg)', offset:.3}, {transform:'scale(1.1) rotate(4deg)', offset:.6}, {transform:'scale(1) rotate(0)'}], {duration:800});
+    sp.mo.classList.add('happy'); spellHop(true);
+    sr.textContent = 'You spelled ' + sp.word.toLowerCase() + '! Press the arrow for the next word.';
+    setTimeout(() => { if (sp) sp.nx.classList.add('show'); }, 500);
+  }, t);
+}
+$('#sboard').addEventListener('click', e => {
+  if (!sp || !sp.done) return;
+  if (e.target.closest('.snext')){ audio(); pip(); buildWord(); }
+});
+
+// ---- a hand shows where the next block goes ----
+function stopSHint(){
+  clearTimeout(sHintTimer);
+  if (sHintAnim){ sHintAnim.cancel(); sHintAnim = null; }
+}
+function scheduleSHint(ms){
+  clearTimeout(sHintTimer);
+  sHintTimer = setTimeout(showSHint, ms);
+}
+function showSHint(){
+  if (state !== 'spell' || !sp || sp.done || sp.drag) return;
+  const i = sp.slots.findIndex(s => !s.filled); if (i < 0) return;
+  const blk = sp.blocks.find(b => b.placed < 0 && !b.busy && b.ch === sp.word[i]); if (!blk) return;
+  const b = sp.g.b, W = 64;
+  const a = sToPage(blk.hx + b / 2, blk.hy + b / 2), c = sToPage(sp.slots[i].cx, sp.slots[i].cy);
+  const sx = a.x - W / 2, sy = a.y - W * HAND_TIP, ex = c.x - W / 2, ey = c.y - W * HAND_TIP;
+  if (sHintAnim) sHintAnim.cancel();
+  sHintAnim = dhand.animate([
+    {transform:`translate(${sx}px,${sy}px) scale(1)`, opacity:0, offset:0},
+    {transform:`translate(${sx}px,${sy}px) scale(.92)`, opacity:1, offset:.15},
+    {transform:`translate(${ex}px,${ey}px) scale(.92)`, opacity:1, offset:.75},
+    {transform:`translate(${ex}px,${ey}px) scale(1)`, opacity:0, offset:1}
+  ], {duration:2000, iterations:Infinity, easing:'ease-in-out'});
+}
+
+function startSpell(key){
+  currentGame = 'spelling'; spellKey = key;
+  sMoflinBtn.innerHTML = moflinSVG(THEMES[key], 'sbtn');
+  fx.innerHTML = '';
+  show('spell'); state = 'spell';
+  buildWord();
+}
+function leaveSpell(){
+  stopSHint();
+  if (sp && sp.drag) sp.drag = null;
+  sp = null;
+}
+
+// ---------- game flow ----------
+// every game has a hurdle to hop. Sometimes there are two (and nothing else);
+// otherwise there is one, plus a random extra: nothing, one chute or one ladder
+function randomFeatures(){
+  if (Math.random() < 0.35) return {hurdles:2, chutes:0, ladders:0};
+  const f = {hurdles:1, chutes:0, ladders:0};
+  if (Math.random() >= 0.2) f[Math.random() < 0.5 ? 'chutes' : 'ladders'] = 1;
+  return f;
+}
+function show(screen){
+  home.hidden = screen !== 'home';
+  pick.hidden = screen !== 'pick';
+  play.hidden = screen !== 'play';
+  dress.hidden = screen !== 'dress';
+  vehicleScr.hidden = screen !== 'vehicle';
+  raceScr.hidden = screen !== 'race';
+  spellScr.hidden = screen !== 'spell';
+}
+function startGame(key){
+  currentGame = 'maze';
+  jumperEl.innerHTML = moflinSVG(THEMES[key], 'game');
+  moflinBtn.innerHTML = moflinSVG(THEMES[key], 'btn');
+  show('play');
+  newMaze();
+}
+function goHub(){
+  state = 'home';
+  stopHint(); resetActors(); leaveDress(); leaveRace(); leaveSpell();
+  show('home'); layoutHome();
+}
+function goPick(game){
+  pendingGame = game || currentGame;
+  pickTitle.textContent = GAMES.find(g => g.id === pendingGame).label;
+  state = 'pick';
+  stopHint(); resetActors(); leaveDress(); leaveRace(); leaveSpell();
+  show('pick'); layoutPick();
+}
+function resetActors(){
+  jumperEl.getAnimations().forEach(a => a.cancel());
+  shadowEl.getAnimations().forEach(a => a.cancel());
+  hops = 0; hopping = false; glide = null; motion = null; dragging = false; nearT = 0;
+  fx.innerHTML = '';
+  moflinEl.classList.remove('invite', 'held');
+  jumperEl.classList.remove('happy', 'sliding');
+  againBtn.classList.remove('show');
+  sr.textContent = '';
+}
+function newMaze(){
+  stopHint(); resetActors();
+  const {aw, ah} = stageSize(), {w, h} = chooseDims(aw, ah);
+  buildMaze(w, h, randomFeatures()); renderMaze();
+  pos.x = 1.5; pos.y = 1.5; vx = 0;
+  applySize();
+  state = 'play';
+  setTimeout(() => { if (state === 'play' && !motion) showDragHint(); }, 500);
+}
+function win(){
+  if (state !== 'play') return;
+  state = 'won';
+  dragging = false; moflinEl.classList.remove('held');
+  stopHint();
+  glide = {fx:pos.x, fy:pos.y, t0:performance.now(), dur:380};
+  jumperEl.classList.add('happy');
+  moflinEl.classList.add('invite');
+  jingle(); burst(64);
+  sr.textContent = 'You did it! Tap the Moflin to make it jump.';
+  setTimeout(() => againBtn.classList.add('show'), 700);
+  setTimeout(() => { if (state === 'won' && hops === 0 && moflinEl.classList.contains('invite')) showTapHint(); }, 1500);
+}
+
+// ---------- dragging and tapping ----------
+moflinEl.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  audio();
+  if (state === 'won'){ tapMoflin(); return; }
+  if (state !== 'play' || motion) return;
+  try { moflinEl.setPointerCapture(e.pointerId); } catch (_) {}
+  dragging = true; moved = false; pid = e.pointerId; downT = performance.now();
+  ptr = toTile(e); downPtr = {x:ptr.x, y:ptr.y};
+  off = {x: pos.x - ptr.x, y: pos.y - ptr.y};
+  const len = Math.hypot(off.x, off.y);
+  if (len > 1){ off.x /= len; off.y /= len; }
+  rest = e.pointerType === 'touch' ? {x:0, y:-0.32} : {x:0, y:0};
+  moflinEl.classList.add('held');
+  stopHint();
+  nearT = performance.now();
+});
+moflinEl.addEventListener('pointermove', e => {
+  if (!dragging || e.pointerId !== pid) return;
+  ptr = toTile(e);
+  if (!moved && Math.hypot(ptr.x - downPtr.x, ptr.y - downPtr.y) > 0.14){ moved = true; pip(); }
+});
+function release(e){
+  if (!dragging || (e && e.pointerId !== pid)) return;
+  const wasTap = !moved && e && e.type === 'pointerup' && performance.now() - downT < 500;
+  dragging = false;
+  moflinEl.classList.remove('held');
+  if (wasTap){ tapInPlay(); return; }
+  scheduleIdle(hurdleAhead() ? 1800 : 6500);
+}
+moflinEl.addEventListener('pointerup', release);
+moflinEl.addEventListener('pointercancel', release);
+moflinEl.addEventListener('contextmenu', e => e.preventDefault());
+
+// keyboard: arrows / WASD to move, Space or Enter on the Moflin to jump
+const KEYMAP = {ArrowLeft:'left', ArrowRight:'right', ArrowUp:'up', ArrowDown:'down', a:'left', d:'right', w:'up', s:'down'};
+addEventListener('keydown', e => {
+  const m = KEYMAP[e.key];
+  if (state === 'play' && m){ keys[m] = true; stopHint(); e.preventDefault(); }
+  else if ((e.key === ' ' || e.key === 'Enter') && document.activeElement === moflinEl){
+    e.preventDefault();
+    if (state === 'won') tapMoflin(); else if (state === 'play') tapInPlay();
+  }
+});
+addEventListener('keyup', e => { const m = KEYMAP[e.key]; if (m) keys[m] = false; });
+addEventListener('blur', () => { keys.left = keys.right = keys.up = keys.down = false; });
+
+// ---------- buttons ----------
+$('#homeBtn').addEventListener('click', goHub);
+$('#pickHome').addEventListener('click', goHub);
+moflinBtn.addEventListener('click', () => goPick('maze'));
+$('#dHomeBtn').addEventListener('click', goHub);
+dMoflinBtn.addEventListener('click', () => goPick('dressup'));
+$('#vHomeBtn').addEventListener('click', goHub);
+vMoflinBtn.addEventListener('click', () => goPick('races'));
+$('#rHomeBtn').addEventListener('click', goHub);
+$('#sHomeBtn').addEventListener('click', goHub);
+sMoflinBtn.addEventListener('click', () => goPick('spelling'));
+rMoflinBtn.addEventListener('click', () => goPick('races'));
+rVehicleBtn.addEventListener('click', goVehicle);
+rAgainBtn.addEventListener('click', () => { audio(); pip(); startRace(raceType); });
+const nextMaze = () => { audio(); pip(); newMaze(); };
+$('#newBtn').addEventListener('click', nextMaze);
+againBtn.addEventListener('click', nextMaze);
+
+// ---------- main loop ----------
+function tick(t){
+  requestAnimationFrame(tick);          // schedule the next frame first, so one hiccup can never stop the loop
+  const dt = clamp((t - last) / 1000 || 0.016, 0.001, 0.05);
+  last = t;
+  const px = pos.x, py = pos.y;
+
+  if (motion){
+    runMotion(t);
+  } else if (state === 'play'){
+    if (dragging){
+      if (moved){
+        const k = Math.min(1, dt * 7);
+        off.x += (rest.x - off.x) * k; off.y += (rest.y - off.y) * k;
+      }
+      stepToward(ptr.x + off.x, ptr.y + off.y, 26 * dt);
+    } else {
+      const kx = (keys.right ? 1 : 0) - (keys.left ? 1 : 0), ky = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+      if (kx || ky) stepToward(pos.x + kx, pos.y + ky, 4.5 * dt);
+    }
+    const c = chuteAt(), l = c ? null : ladderAt();
+    if (c) startSlide(c);
+    else if (l) startClimb(l);
+    else if (Math.hypot(pos.x - goal.x, pos.y - goal.y) < 0.42) win();
+    else {
+      // stuck at a hurdle for a while? show the tapping hand
+      if (hurdleAhead()){
+        if (!nearT) nearT = t;
+        if (t - nearT > 2200 && !hintAnim) showTapHint();
+      } else {
+        nearT = 0;
+        if (hintAnim && hintKind === 'tap') stopHint();
+      }
+    }
+  }
+  if (glide){
+    const p = clamp((t - glide.t0) / glide.dur, 0, 1), e = 1 - Math.pow(1 - p, 3);
+    pos.x = glide.fx + (goal.x - glide.fx) * e;
+    pos.y = glide.fy + (goal.y + 0.06 - glide.fy) * e;
+    if (p >= 1) glide = null;
+  }
+  if (state === 'race') raceStep(dt, t);
+  if (g && (pos.x !== px || pos.y !== py)) place();
+
+  vx += (((pos.x - px) / dt) - vx) * Math.min(1, dt * 10);
+  tiltEl.style.transform = motion && motion.type !== 'jump' ? 'none' : `rotate(${clamp(vx * 3.2, -14, 14)}deg)`;
+}
+requestAnimationFrame(tick);
+
+// ---------- resize ----------
+let rz = 0;
+addEventListener('resize', () => {
+  cancelAnimationFrame(rz);
+  rz = requestAnimationFrame(() => {
+    if (!home.hidden){ layoutHome(); return; }
+    if (!dress.hidden){ layoutDress(); scheduleDHint(); return; }
+    if (!spellScr.hidden){ layoutSpell(); if (sHintAnim) showSHint(); return; }
+    if (!vehicleScr.hidden){ layoutVehicle(); return; }
+    if (!raceScr.hidden){ layoutRace(); if (rHintAnim) showRaceHint(); return; }
+    if (!pick.hidden){ layoutPick(); return; }
+    applySize();
+    if (hintAnim){ if (hintKind === 'tap') showTapHint(); else showDragHint(); }
+  });
+});
+
+layoutHome();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { layoutHome(); layoutPick(); });
+})();
+</script>
+</body>
+</html>
