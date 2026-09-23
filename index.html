@@ -345,6 +345,8 @@ button:focus-visible,#moflin:focus-visible .tilt{outline:4px solid var(--focus);
 @keyframes glow{0%,100%{opacity:.3;transform:scale(.92)}50%{opacity:.65;transform:scale(1.12)}}
 @keyframes ring{0%{transform:scale(.75);opacity:.9}100%{transform:scale(1.7);opacity:0}}
 @keyframes pop{to{transform:scale(1);opacity:1}}
+.wsparkle{transform-box:fill-box;transform-origin:center;animation:twinkle 1.6s ease-in-out infinite}
+@keyframes twinkle{0%,100%{opacity:.35;transform:scale(.7)}50%{opacity:1;transform:scale(1.15)}}
 @keyframes flow{to{stroke-dashoffset:-.35}}
 @keyframes swirl{to{transform:rotate(360deg)}}
 
@@ -355,7 +357,7 @@ button:focus-visible,#moflin:focus-visible .tilt{outline:4px solid var(--focus);
   .again{width:56px;height:56px}
 }
 @media (prefers-reduced-motion:reduce){
-  .pick .bob,.tile .art,.eyes-open,.goal-glow,.jumper svg,#dm svg,.smoj svg,.tube-flow,.swirl{animation:none!important}
+  .pick .bob,.tile .art,.eyes-open,.goal-glow,.jumper svg,#dm svg,.smoj svg,.tube-flow,.swirl,.wsparkle{animation:none!important}
   #moflin.invite .ring{animation:none;opacity:.8}
 }
 </style>
@@ -1551,9 +1553,9 @@ const flower = (x, y, petal, mid) => {
 };
 
 // where each kind of thing sits on the Moflin (Moflin drawing units)
-const SLOTS = {hat:[0, -40], face:[0, -6], wings:[0, 0], tail:[28, 30]};
+const SLOTS = {hat:[0, -40], critter:[0, -6], eyes:[0, -6], wings:[0, 0], tail:[28, 30], wand:[36, 22]};
 const BACK_SLOTS = ['wings', 'tail'];
-const HITS = {hat:[0, -20, 30], face:[0, 0, 24]};   // generous invisible grab areas
+const HITS = {hat:[0, -20, 30], critter:[0, 0, 24], eyes:[0, 0, 24], wand:[36, 22, 20]};   // generous invisible grab areas
 
 const ITEMS = [
   // --- hats and crowns ---
@@ -1570,18 +1572,32 @@ const ITEMS = [
   {id:'cowboy', slot:'hat', cat:'head', name:'Cowboy hat', vb:'-40 -44 80 60', draw:() =>
     `<path d="M-38 3Q-33 -7 -21 -4L21 -4Q33 -7 38 3Q0 14 -38 3Z" fill="#B9773D"/><path d="M-17 -3L-15 -30Q0 -38 15 -30L17 -3Z" fill="#C98B4E"/><path d="M-9 -33Q0 -27 9 -33" fill="none" stroke="#8A5A2B" stroke-width="2" stroke-linecap="round"/><rect x="-17" y="-12" width="34" height="7" fill="#7A4B22"/>`},
   // --- glasses and masks ---
-  {id:'round', slot:'face', cat:'face', name:'Round glasses', vb:'-38 -16 76 32', draw:() =>
+  {id:'round', slot:'eyes', cat:'face', name:'Round glasses', vb:'-38 -16 76 32', draw:() =>
     `<g fill="#7CC6F7" fill-opacity=".3" stroke="#33285A" stroke-width="3"><circle cx="-15" cy="0" r="10.5"/><circle cx="15" cy="0" r="10.5"/></g><path d="M-4.5 -1Q0 -4 4.5 -1M-25 -2L-33 -5M25 -2L33 -5" fill="none" stroke="#33285A" stroke-width="3" stroke-linecap="round"/><path d="M-21 -5Q-18 -8 -14 -7M9 -5Q12 -8 16 -7" fill="none" stroke="#fff" stroke-opacity=".85" stroke-width="2" stroke-linecap="round"/>`},
-  {id:'starglasses', slot:'face', cat:'face', name:'Star glasses', vb:'-38 -16 76 32', draw:() =>
+  {id:'starglasses', slot:'eyes', cat:'face', name:'Star glasses', vb:'-38 -16 76 32', draw:() =>
     `<polygon points="${starPts(-15, 0, 13.5, 6.2)}" fill="#FFE27A" fill-opacity=".85" stroke="#C98F1B" stroke-width="2.4" stroke-linejoin="round"/><polygon points="${starPts(15, 0, 13.5, 6.2)}" fill="#FFE27A" fill-opacity=".85" stroke="#C98F1B" stroke-width="2.4" stroke-linejoin="round"/><path d="M-3 -2Q0 -4 3 -2M-27 -3L-34 -5M27 -3L34 -5" fill="none" stroke="#C98F1B" stroke-width="2.6" stroke-linecap="round"/>`},
-  {id:'heartglasses', slot:'face', cat:'face', name:'Heart glasses', vb:'-38 -16 76 32', draw:() =>
+  {id:'heartglasses', slot:'eyes', cat:'face', name:'Heart glasses', vb:'-38 -16 76 32', draw:() =>
     `${heartAt(-15, 0, .78, '#FF8FB8', '#D6789B')}${heartAt(15, 0, .78, '#FF8FB8', '#D6789B')}<path d="M-3 -3Q0 -5 3 -3M-27 -4L-34 -6M27 -4L34 -6" fill="none" stroke="#D6789B" stroke-width="2.6" stroke-linecap="round"/>`},
-  {id:'sunglasses', slot:'face', cat:'face', name:'Sunglasses', vb:'-38 -16 76 32', draw:() =>
+  {id:'sunglasses', slot:'eyes', cat:'face', name:'Sunglasses', vb:'-38 -16 76 32', draw:() =>
     `<rect x="-26" y="-7.5" width="22" height="15" rx="6.5" fill="#2A2036"/><rect x="4" y="-7.5" width="22" height="15" rx="6.5" fill="#2A2036"/><path d="M-4 -3Q0 -6 4 -3M-26 -3L-34 -5M26 -3L34 -5" fill="none" stroke="#2A2036" stroke-width="3" stroke-linecap="round"/><path d="M-22 -3L-15 -3M8 -3L15 -3" stroke="#fff" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>`},
-  {id:'hero', slot:'face', cat:'face', name:'Superhero mask', vb:'-38 -22 76 40', draw:() =>
+  {id:'hero', slot:'eyes', cat:'face', name:'Superhero mask', vb:'-38 -22 76 40', draw:() =>
     `<path fill-rule="evenodd" fill="#F0625A" stroke="#B3342B" stroke-width="2" stroke-linejoin="round" d="M-31 -9Q-16 -18 0 -9Q16 -18 31 -9Q34 7 19 9Q9 9 0 3Q-9 9 -19 9Q-34 7 -31 -9Z M-24 0a9 7.5 0 1 0 18 0a9 7.5 0 1 0 -18 0Z M6 0a9 7.5 0 1 0 18 0a9 7.5 0 1 0 -18 0Z"/>`},
-  {id:'catface', slot:'face', cat:'face', name:'Cat nose and whiskers', vb:'-56 0 112 32', draw:() =>
+  {id:'wand', slot:'wand', cat:'face', name:'Magic wand', vb:'-36 -56 82 92', draw:() =>
+    `<g transform="rotate(22 4 20)"><rect x="-1" y="-30" width="10" height="46" rx="4" fill="#B9773D" stroke="#8A5A2B" stroke-width="1.6" stroke-linejoin="round"/><rect x="-1" y="6" width="10" height="10" fill="#8A5A2B" opacity=".5"/><polygon points="${starPts(4, -34, 13, 6)}" fill="#FFC83D" stroke="#C98F1B" stroke-width="2" stroke-linejoin="round"/></g><g class="wsparkle" style="animation-delay:0s">${spark(-16, -38, 4.5, '#fff')}</g><g class="wsparkle" style="animation-delay:.4s">${spark(18, -30, 5.5, '#FFC83D')}</g><g class="wsparkle" style="animation-delay:.8s">${spark(-20, -10, 3.5, '#FFC83D')}</g><g class="wsparkle" style="animation-delay:1.2s">${spark(14, -6, 3, '#fff')}</g>`},
+  // --- animal faces ---
+  {id:'catface', slot:'critter', cat:'critter', name:'Cat nose and whiskers', vb:'-56 0 112 32', draw:() =>
     `<path d="M-5 8L5 8L0 14Z" fill="#FF7FA5" stroke="#D6486E" stroke-width="1.5" stroke-linejoin="round"/><path d="M0 14Q-4 19 -9 16M0 14Q4 19 9 16" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/><path d="M-22 9L-50 3M-22 13L-52 14M-22 17L-50 25M22 9L50 3M22 13L52 14M22 17L50 25" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`},
+  {id:'bunnyface', slot:'critter', cat:'critter', name:'Bunny nose and whiskers', vb:'-56 -30 112 62', draw:() =>
+    `<ellipse cx="-13" cy="-22" rx="7" ry="17" transform="rotate(-8 -13 -22)" fill="#fff" stroke="#D8DEF0" stroke-width="1.5"/><ellipse cx="13" cy="-22" rx="7" ry="17" transform="rotate(8 13 -22)" fill="#fff" stroke="#D8DEF0" stroke-width="1.5"/><ellipse cx="-13" cy="-20" rx="3.4" ry="11" transform="rotate(-8 -13 -20)" fill="#FFC2D6"/><ellipse cx="13" cy="-20" rx="3.4" ry="11" transform="rotate(8 13 -20)" fill="#FFC2D6"/><path d="M-5 8L5 8L0 14Z" fill="#FF9FB2" stroke="#D6789B" stroke-width="1.5" stroke-linejoin="round"/><path d="M0 14V17M0 17Q-4 21 -9 18M0 17Q4 21 9 18" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/><path d="M-22 9L-50 3M-22 13L-52 14M-22 17L-50 25M22 9L50 3M22 13L52 14M22 17L50 25" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`},
+  {id:'puppyface', slot:'critter', cat:'critter', name:'Puppy nose and floppy ears', vb:'-58 -26 116 60', draw:() => {
+    const ear = `<path d="M-16 -14C-30 -20 -46 -8 -44 10C-43 22 -30 26 -22 18C-26 8 -24 -6 -16 -14Z" fill="#C98B4E" stroke="#8A5A2B" stroke-width="1.6" stroke-linejoin="round"/>`;
+    return ear + mirror(ear) + `<ellipse cx="0" cy="10" rx="11" ry="8" fill="#8A5A2B"/><ellipse cx="-3" cy="7" rx="3" ry="2.2" fill="#fff" opacity=".5"/><path d="M0 18V22M0 22Q-5 27 -10 23M0 22Q5 27 10 23" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`; }},
+  {id:'bearface', slot:'critter', cat:'critter', name:'Bear snout', vb:'-46 -50 92 86', draw:() =>
+    `<ellipse cx="-27" cy="-35" rx="12" ry="12" fill="#B9773D" stroke="#8A5A2B" stroke-width="1.6"/><ellipse cx="27" cy="-35" rx="12" ry="12" fill="#B9773D" stroke="#8A5A2B" stroke-width="1.6"/><ellipse cx="-27" cy="-34" rx="6.2" ry="6.2" fill="#E5B27C"/><ellipse cx="27" cy="-34" rx="6.2" ry="6.2" fill="#E5B27C"/><ellipse cx="0" cy="18" rx="18" ry="14" fill="#E5B27C"/><ellipse cx="0" cy="12" rx="8" ry="5.6" fill="#33285A"/><path d="M0 17V21M0 21Q-5 26 -10 22M0 21Q5 26 10 22" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`},
+  {id:'tigerface', slot:'critter', cat:'critter', name:'Tiger nose and stripes', vb:'-58 -22 116 58', draw:() =>
+    `<path d="M-42 -14L-30 -10M-46 -2L-32 -2M-42 10L-30 8M42 -14L30 -10M46 -2L32 -2M42 10L30 8" fill="none" stroke="#C7791B" stroke-width="4" stroke-linecap="round"/><path d="M-5 8L5 8L0 14Z" fill="#F2A63B" stroke="#C7791B" stroke-width="1.5" stroke-linejoin="round"/><path d="M0 14V18M0 18Q-4 23 -9 19M0 18Q4 23 9 19" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/><path d="M-22 9L-52 3M-22 13L-54 14M-22 17L-52 26M22 9L52 3M22 13L54 14M22 17L52 26" fill="none" stroke="#33285A" stroke-width="1.8" stroke-linecap="round"/>`},
+  {id:'sharkface', slot:'critter', cat:'critter', name:'Shark face', vb:'-40 -6 80 46', draw:() =>
+    `<path d="M-32 6Q0 -6 32 6Q0 -1 -32 6Z" fill="#8FA6C2" stroke="#5B7089" stroke-width="1.6" stroke-linejoin="round"/><path d="M-24 8L-19 15L-14 8ZM-9 9L-4 16L1 9ZM6 9L11 16L16 9ZM21 8L26 15L31 8Z" fill="#fff" stroke="#5B7089" stroke-width=".8" stroke-linejoin="round"/><path d="M-18 -3Q0 -9 18 -3" fill="none" stroke="#5B7089" stroke-width="1.6" stroke-linecap="round"/>`},
   // --- wings and tails ---
   {id:'fairy', slot:'wings', cat:'back', name:'Fairy wings', vb:'-88 -44 176 76', draw:() => {
     const h = `<ellipse cx="-56" cy="-16" rx="27" ry="13" transform="rotate(-35 -56 -16)" fill="#B39CFF" fill-opacity=".7" stroke="#fff" stroke-width="2"/><ellipse cx="-50" cy="12" rx="19" ry="9" transform="rotate(28 -50 12)" fill="#7CC6F7" fill-opacity=".7" stroke="#fff" stroke-width="2"/>`;
@@ -1600,10 +1616,10 @@ const ITEMS = [
     `<path d="${furPath(16, 16, 9, .12, 3)}" transform="translate(6 6)" fill="#fff" stroke="#D8DEF0" stroke-width="1.2"/>`}
 ];
 const itemById = Object.fromEntries(ITEMS.map(i => [i.id, i]));
-const CATS = [{id:'head', icon:'crown'}, {id:'face', icon:'round'}, {id:'back', icon:'fairy'}];
+const CATS = [{id:'head', icon:'crown'}, {id:'critter', icon:'catface'}, {id:'face', icon:'round'}, {id:'back', icon:'fairy'}];
 const GHOST = (cx, cy) => `<ellipse cx="${cx}" cy="${cy}" rx="42" ry="46" fill="#33285A" fill-opacity=".07"/>`;
 const thumb = it => `<svg viewBox="${it.vb}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${it.slot === 'wings' ? GHOST(0, 0) : ''}${it.draw()}</svg>`;
-const TILE_BG = {head:'#FFF1CF', face:'#DDF0FF', back:'#EDE3FF'};
+const TILE_BG = {head:'#FFF1CF', critter:'#FFE1D2', face:'#DDF0FF', back:'#EDE3FF'};
 
 let dressKey = 'pink', outfit = {}, tab = 'head', photoBusy = false, drag = null;
 
@@ -1614,12 +1630,12 @@ function wornGroup(it){
 }
 function dressedSVG(){
   const w = slot => outfit[slot] ? wornGroup(itemById[outfit[slot]]) : '';
-  return `<svg viewBox="-96 -110 192 204" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${w('wings')}${w('tail')}${moflinInner(THEMES[dressKey], 'dm')}${w('hat')}${w('face')}</svg>`;
+  return `<svg viewBox="-96 -110 192 204" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">${w('wings')}${w('tail')}${moflinInner(THEMES[dressKey], 'dm')}${w('critter')}${w('hat')}${w('eyes')}${w('wand')}</svg>`;
 }
 function renderDress(){ dm.innerHTML = dressedSVG(); }
 
 function renderTabs(){
-  tabsEl.innerHTML = CATS.map(c => `<button class="tab" type="button" data-cat="${c.id}" aria-label="${{head:'Hats and crowns', face:'Glasses and masks', back:'Wings and tails'}[c.id]}" aria-selected="${c.id === tab}">${thumb(itemById[c.icon])}</button>`).join('');
+  tabsEl.innerHTML = CATS.map(c => `<button class="tab" type="button" data-cat="${c.id}" aria-label="${{head:'Hats and crowns', critter:'Animal faces', face:'Glasses and masks', back:'Wings and tails'}[c.id]}" aria-selected="${c.id === tab}">${thumb(itemById[c.icon])}</button>`).join('');
 }
 function renderTray(){
   renderTabs();
